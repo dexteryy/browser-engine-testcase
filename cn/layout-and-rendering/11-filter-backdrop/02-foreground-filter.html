@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>测试用例11-2：前景滤镜（filter: blur()）准确性与层合成</title>
+  <link rel="stylesheet" href="./shared.css">
+  <script type="module">
+    import { PerfHUD } from './perf-hud.js';
+    const hud = new PerfHUD();
+    const state = {
+      enabled: true,
+      blur: 5,
+      willChange: false,
+      forceLayer: false,
+      autoScroll: false,
+      autoSpeed: 2,
+    };
+    const $ = (s,ctx=document)=>ctx.querySelector(s);
+    let rafId = 0;
+    function apply(){
+      document.documentElement.style.setProperty('--img-blur', state.blur + 'px');
+      const img = $('.photo');
+      img.dataset.enabled = state.enabled ? 'true':'false';
+      img.style.willChange = state.willChange ? 'filter' : '';
+      img.style.transform = state.forceLayer ? 'translateZ(0)' : '';
+      $('#blurVal').textContent = state.blur + 'px';
+      $('#flagEnabled').textContent = state.enabled ? '开' : '关';
+      $('#flagWC').textContent = state.willChange ? 'on' : 'off';
+      $('#flagLayer').textContent = state.forceLayer ? 'on' : 'off';
+    }
+    function loop(){
+      if(!state.autoScroll) return;
+      window.scrollBy(0, state.autoSpeed);
+      if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight || window.scrollY <= 0) {
+        state.autoSpeed = -state.autoSpeed;
+      }
+      rafId = requestAnimationFrame(loop);
+    }
+    function toggleAuto(on){
+      cancelAnimationFrame(rafId);
+      state.autoScroll = on;
+      if(on) rafId = requestAnimationFrame(loop);
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+      apply();
+      // IO to display viewport status
+      const visEl = $('#inview');
+      const io = new IntersectionObserver(entries => {
+        visEl.textContent = entries[0].isIntersecting ? '是' : '否';
+      }, {threshold: 0.01});
+      io.observe($('.photo'));
+      // UI bindings
+      $('#enable').addEventListener('change', e => { state.enabled = e.target.checked; apply(); });
+      $('#blur').addEventListener('input', e => { state.blur = +e.target.value; apply(); });
+      $('#wc').addEventListener('change', e => { state.willChange = e.target.checked; apply(); });
+      $('#layer').addEventListener('change', e => { state.forceLayer = e.target.checked; apply(); });
+      $('#auto').addEventListener('change', e => toggleAuto(e.target.checked));
+      $('#speed').addEventListener('input', e => state.autoSpeed = +e.target.value);
+      $('#hud').addEventListener('change', e => e.target.checked ? hud.start() : hud.stop());
+      $('#reset').addEventListener('click', () => {
+        Object.assign(state, {enabled:true, blur:5, willChange:false, forceLayer:false, autoScroll:false, autoSpeed:2});
+        $('#enable').checked = true; $('#blur').value = 5; $('#wc').checked = false; $('#layer').checked = false;
+        $('#auto').checked = false; $('#speed').value = 2; $('#hud').checked = false; hud.stop();
+        apply(); window.scrollTo({top:0});
+      });
+    });
+  </script>
+</head>
+<body>
+  <!-- 顶栏（本页为纯说明用，不应用 backdrop-filter，避免干扰单项测试） -->
+  <header class="masthead">
+    <div class="container title">
+      <h1>测试用例11-2：前景滤镜（filter: blur()）准确性与层合成</h1>
+      <span class="sub">正文图片应用 <code>filter: blur()</code>，验证视觉与层优化</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="toolbar" aria-label="工具栏">
+      <div class="row">
+        <div class="group"><label><input id="enable" type="checkbox" checked> 启用 filter</label></div>
+        <div class="group"><label>模糊半径 <input id="blur" type="range" min="0" max="20" step="1" value="5"></label><span class="num" id="blurVal">5px</span></div>
+        <div class="group"><label><input id="wc" type="checkbox"> will-change: filter</label></div>
+        <div class="group"><label><input id="layer" type="checkbox"> 强制合成层(transform: translateZ(0))</label></div>
+      </div>
+      <div class="row">
+        <div class="group"><label><input id="auto" type="checkbox"> 自动滚动</label></div>
+        <div class="group"><label>速度 <input id="speed" type="range" min="1" max="12" step="1" value="2"></label><span class="num">px/帧</span></div>
+        <div class="group"><label><input id="hud" type="checkbox"> 开启性能HUD</label></div>
+        <span class="flag">图片在视口：<b id="inview">未知</b></span>
+        <button id="reset">重置</button>
+      </div>
+    </section>
+
+    <section class="test-area">
+      <div class="section">
+        <h2>测试区域：正文图片（前景滤镜）</h2>
+        <p class="meta">下图始终应用 <code>filter: blur()</code>；无论是否在视口内，滤镜都应保持生效。</p>
+      </div>
+      <div class="scroller long-list">
+        <p>段落 1：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 2：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 3：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 4：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 5：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 6：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 7：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 8：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 9：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 10：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 11：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 12：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 13：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 14：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 15：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 16：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 17：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 18：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 19：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+<p>段落 20：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
+        <div class="photo-wrap">
+          <img class="photo" src="./assets/pattern.svg" alt="彩色网格背景（用于观察模糊效果）" data-enabled="true">
+        </div>
+        <p>段落 21：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 22：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 23：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 24：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 25：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 26：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 27：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 28：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 29：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 30：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 31：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 32：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 33：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 34：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 35：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 36：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 37：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 38：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 39：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 40：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 41：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 42：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 43：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 44：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 45：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 46：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 47：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 48：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 49：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 50：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 51：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 52：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 53：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+<p>段落 54：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
+      </div>
+    </section>
+
+    <section class="explain" aria-label="解释说明">
+      <div class="section">
+        <h3>测试目标</h3>
+        <ul>
+          <li>验证 <code>filter: blur()</code> 的视觉正确性与边缘采样质量。</li>
+          <li>检验图片在静止时是否被提升为合成层，以减少滚动中的重绘成本。</li>
+        </ul>
+      </div>
+      <div class="section">
+        <h3>使用方法</h3>
+        <ul>
+          <li>静止检查：放大模糊半径，确认文字与网格的细节被均匀模糊，无明显方向性条纹。</li>
+          <li>滚动检查：上下滚动，观察当图片离开视口后，是否仍有明显性能开销。</li>
+          <li>尝试勾选 <code>will-change</code> 或“强制合成层”，对比合成与绘制阶段耗时。</li>
+        </ul>
+      </div>
+      <div class="section">
+        <h3>结果评估</h3>
+        <ul>
+          <li>理想情况：图片为独立合成层；滚动主要由合成完成，帧率稳定。</li>
+          <li>若观察到卡顿：降低模糊半径或开启优化提示；对比 HUD 指标变化。</li>
+        </ul>
+      </div>
+    </section>
+
+    <nav class="footer-nav">
+      <a href="./01-backdrop-scroll.html">返回 11-1：背景滤镜</a>
+      <a href="./03-combined.html">前往 11-3：综合场景</a>
+    </nav>
+  </main>
+</body>
+</html>

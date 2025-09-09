@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN" id="external">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>测试用例9：外部 SVG 引用</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="inner">
+      <h1>测试用例9：SVG 图像嵌入与引用方式</h1>
+      <div class="desc">外部 SVG 文件，通过 &lt;img&gt; / &lt;object&gt; / &lt;embed&gt; 引用</div>
+      <nav class="nav">
+        <a href="./index.html">对比</a>
+        <a href="./inline.html">内联SVG</a>
+        <a class="active" href="./external.html">外部引用</a>
+        <a href="./css-background.html">CSS 背景</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="toolbar">
+      <div class="tool-group" style="grid-column: span 6;">
+        <h3>引用方式</h3>
+        <div class="tool-inline">
+          <label><input type="radio" name="mode" value="img" checked> &lt;img src&gt;</label>
+          <label><input type="radio" name="mode" value="object"> &lt;object data&gt;</label>
+          <label><input type="radio" name="mode" value="embed"> &lt;embed src&gt;</label>
+        </div>
+        <div class="tool-inline">
+          <label>显示宽度(px)：</label><input type="range" id="w" min="140" max="440" value="260"><span id="wVal" class="note">260</span>
+          <label><input type="checkbox" id="attempt"> 页面 CSS 尝试覆盖 .dot</label>
+        </div>
+      </div>
+      <div class="tool-group" style="grid-column: span 6;">
+        <h3>加载控制</h3>
+        <div class="tool-inline">
+          <label>重复数量：</label><input type="range" id="count" min="1" max="40" value="6"><span id="countVal" class="note">6</span>
+          <button id="render" class="primary">生成</button>
+          <button id="clear">清空</button>
+          <span class="note" id="stat">尚未测试</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="test-area">
+      <div class="holder" id="holder"></div>
+      <div class="note">说明：外部 SVG 作为图像资源呈现，<strong>页面 CSS 无法直接选择内部元素</strong>。对 &lt;object&gt; 而言，其内部是独立文档，同样不受本页面样式影响。</div>
+      <div class="code">&lt;img src="assets/example.svg"&gt; · &lt;object type="image/svg+xml" data="assets/example.svg"&gt;&lt;/object&gt; · &lt;embed src="assets/example.svg" type="image/svg+xml"&gt;</div>
+    </div>
+  </section>
+
+  <section class="section explain">
+    <h2>解释说明</h2>
+    <p><strong>测试目标：</strong>验证通过不同外部引用标签加载 SVG 的行为是否一致，以及样式隔离是否符合预期。</p>
+    <p><strong>使用方法：</strong>切换上方“引用方式”，调整宽度。勾选“页面 CSS 尝试覆盖 .dot”将为本页添加 <code class="code">.attempt-css .dot { fill: #16a34a !important; }</code>，预期对图像资源<strong>不生效</strong>。</p>
+    <p><strong>结果评估：</strong>圆形应保持文件内的红色；DevTools 中只能看到单一元素节点（或一个内嵌文档），看不到 SVG 子节点。</p>
+  </section>
+
+  <footer class="footer">© 测试用例 9 · 外部引用方式</footer>
+
+  <script>
+    // Simple wiring (English comments)
+    const $ = (s, el=document)=>el.querySelector(s);
+    const $$ = (s, el=document)=>Array.from(el.querySelectorAll(s));
+    const holder = $("#holder");
+    const w = $("#w"), wVal = $("#wVal");
+    const attempt = $("#attempt");
+    const count = $("#count"), countVal = $("#countVal");
+    const renderBtn = $("#render"), clearBtn = $("#clear");
+    const stat = $("#stat");
+
+    function buildOne(mode, width){
+      const wrap = document.createElement("div");
+      wrap.style.width = width + "px";
+      wrap.style.height = Math.round(width * 0.68) + "px";
+      wrap.style.display = "grid";
+      wrap.style.placeItems = "center";
+      wrap.style.border = "1px solid #e5e7eb";
+      wrap.style.borderRadius = "8px";
+      wrap.style.margin = "6px";
+      let el;
+      if(mode === "img"){
+        el = new Image();
+        el.src = "./assets/example.svg";
+        el.width = width;
+        el.height = Math.round(width * 0.68);
+        el.alt = "外部 SVG";
+        el.decoding = "async";
+      }else if(mode === "object"){
+        el = document.createElement("object");
+        el.type = "image/svg+xml";
+        el.data = "./assets/example.svg";
+        el.width = width;
+        el.height = Math.round(width * 0.68);
+      }else{
+        el = document.createElement("embed");
+        el.type = "image/svg+xml";
+        el.src = "./assets/example.svg";
+        el.width = width;
+        el.height = Math.round(width * 0.68);
+      }
+      wrap.appendChild(el);
+      return {wrap, el};
+    }
+
+    function renderMany(){
+      const mode = $$("input[name=mode]").find(i=>i.checked).value;
+      const n = +count.value;
+      holder.innerHTML = "";
+      const t0 = performance.now();
+      const pending = [];
+      for(let i=0;i<n;i++){
+        const {wrap, el} = buildOne(mode, +w.value);
+        holder.appendChild(wrap);
+        pending.push(new Promise(res=>{
+          if((el.tagName === "IMG" || el.tagName === "EMBED") && el.complete){ res(); return; }
+          el.addEventListener("load", res, {once:true});
+          el.addEventListener("error", res, {once:true});
+        }));
+      }
+      Promise.all(pending).then(()=>{
+        const t1 = performance.now();
+        stat.textContent = `完成：${n} 个用时 ${(t1 - t0).toFixed(1)} ms（含加载/就绪事件）`;
+      });
+    }
+
+    // Wire
+    w.addEventListener("input", ()=>{ wVal.textContent = w.value; renderMany(); });
+    count.addEventListener("input", ()=>{ countVal.textContent = count.value; });
+    renderBtn.addEventListener("click", renderMany);
+    clearBtn.addEventListener("click", ()=>{ holder.innerHTML = ""; stat.textContent = "已清空"; });
+    attempt.addEventListener("change", ()=>{
+      document.body.classList.toggle("attempt-css", attempt.checked);
+    });
+
+    // Initial render
+    renderMany();
+  </script>
+</body>
+</html>

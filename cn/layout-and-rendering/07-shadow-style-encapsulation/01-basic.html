@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>测试用例7：基础隔离</title>
+  <link rel="stylesheet" href="base.css">
+  <link id="globalStyles" rel="stylesheet" href="global.css">
+  <script>
+  // Define <my-element> (comments in English)
+  class MyElement extends HTMLElement {
+    constructor(){
+      super();
+      const shadow = this.attachShadow({ mode: 'open' });
+      const styleEl = document.createElement('style');
+      styleEl.textContent = `
+        /* Internal styles ONLY affect nodes inside this Shadow Root */
+        :host{ display:block; padding:12px; border:1px solid #ddd; border-radius:6px; background:#fff; }
+        .inside{ color:#e53935; } /* red */
+      `;
+      const wrapper = document.createElement('div');
+      wrapper.className = 'wrapper';
+      const p = document.createElement('p');
+      p.className = 'inside';
+      p.textContent = 'Shadow 文本（应为红色）';
+      wrapper.appendChild(p);
+      shadow.append(styleEl, wrapper);
+      this._styleEl = styleEl; // keep a reference for toggling
+    }
+    get internalStylesEnabled(){ return !this._styleEl.disabled; }
+    set internalStylesEnabled(v){ this._styleEl.disabled = !v; }
+  }
+  customElements.define('my-element', MyElement);
+
+  // Page UI wiring
+  window.addEventListener('DOMContentLoaded', () => {
+    const link = document.getElementById('globalStyles');
+    const chk = document.getElementById('toggleGlobal');
+    const out = document.getElementById('toggleOutline');
+    const chkInternal = document.getElementById('toggleInternal');
+    const el = document.querySelector('my-element');
+
+    chk.addEventListener('change', () => { link.disabled = !chk.checked; });
+    out.addEventListener('change', () => { document.body.classList.toggle('global-outline', out.checked); });
+    chkInternal.addEventListener('change', () => { el.internalStylesEnabled = chkInternal.checked; });
+  });
+  </script>
+</head>
+<body>
+  <div class="topbar">
+    <div class="container">
+      <h1 class="title">测试用例7：Shadow DOM 样式封装隔离 — 基础隔离</h1>
+      <p class="subtitle">验证 Shadow 内部样式不受页面全局 CSS 影响，且不会影响外部。</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="toolbar">
+      <label class="group"><input id="toggleGlobal" type="checkbox" checked> 启用全局干扰样式（global.css）</label>
+      <label class="group"><input id="toggleInternal" type="checkbox" checked> 启用 Shadow 内部样式</label>
+      <label class="group"><input id="toggleOutline" type="checkbox"> 显示页面全局轮廓（辅助观察）</label>
+      <span class="badge">Chromium 最新版</span>
+    </div>
+
+    <div class="test-area">
+      <h2>测试区域</h2>
+      <p class="inside">外部普通文本（类名 <span class="kbd">inside</span>，应为蓝色）</p>
+      <my-element></my-element>
+      <p>上方组件中段落应显示为红色，表示 Shadow 内部样式生效且未被外部蓝色样式覆盖。</p>
+    </div>
+
+    <div class="explain">
+      <h3>测试目标</h3>
+      <p>确认 Shadow DOM 的样式封装：外部 CSS 无法选中 Shadow 内部节点；内部样式也不会泄漏到 Light DOM。</p>
+
+      <h3>方案与使用</h3>
+      <ul>
+        <li>页面通过 <span class="kbd">global.css</span> 定义 <span class="kbd">.inside</span> 与 <span class="kbd">my-element p</span> 的蓝色样式，模拟“全局干扰”。</li>
+        <li><span class="kbd">&lt;my-element&gt;</span> 在构造函数中 <span class="kbd">attachShadow({ mode: 'open' })</span> 并在 Shadow 内注入 <span class="kbd">&lt;style&gt;</span> 设为红色。</li>
+        <li>使用上方工具栏开关可动态启用/停用外部样式或内部样式，观察隔离效果。</li>
+      </ul>
+
+      <h3>期望结果</h3>
+      <ul>
+        <li>“外部普通文本”应为蓝色（受全局样式影响）。</li>
+        <li>组件内部段落应始终为红色（仅受 Shadow 内部样式控制）。</li>
+        <li>关闭“启用全局干扰样式”后，外部文本应回退为默认色；组件内部不受影响。</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,39 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>测试用例3：多列布局（Multicolumn）与内容分栏 - 总览</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header id="topbar">
+    <h1>测试用例3：多列布局（Multicolumn）与内容分栏</h1>
+    <p>用于评估 Chrome 对 CSS 多栏布局（columns）的渲染正确性与性能。</p>
+  </header>
+
+  <section class="container">
+    <div class="test-card">
+      <p>本目录包含多个独立页面，每个页面针对一个细分测试目标。请按需打开：</p>
+      <ul>
+        <li><a href="fixed-count.html">固定列数：column-count</a></li>
+        <li><a href="column-width.html">固定列宽：column-width（自动列数）</a></li>
+        <li><a href="fragmentation-stress.html">复杂分栏与避断：Fragmentation 压力与性能</a></li>
+        <li><a href="column-span.html">跨栏元素：column-span: all</a></li>
+        <li><a href="writing-modes.html">书写方向与列顺序：writing-mode / direction</a></li>
+      </ul>
+      <p class="meta">UI 风格统一：白底、顶栏通栏、其他区域统一宽度。页面文字均为中文，代码注释为英文。</p>
+    </div>
+  </section>
+
+  <section id="explain" class="container">
+    <h2>说明</h2>
+    <ul>
+      <li>每个页面顶部提供工具栏控件，可动态调整列数、列间距、列分隔线等参数。</li>
+      <li>测试区域展示真实的多栏内容，包含段落、小标题与图片等。</li>
+      <li>建议在 DevTools 的 Performance 面板记录首次渲染与滚动性能；如需，可启用 Paint Flashing 辅助观察重绘。</li>
+    </ul>
+  </section>
+</body>
+</html>

@@ -1,0 +1,228 @@
+/* Global shared styles for Test Case 04: Vertical Writing Mode & Text Direction */
+/* All comments in English per requirements */
+:root{
+  --maxw: 1100px;
+  --gutter: 16px;
+  --accent: #0d6efd;
+  --muted: #666;
+  --border: #e5e7eb;
+  --bg: #ffffff;
+  --panel-bg:#fafafa;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06);
+  --radius: 10px;
+  --fs: 18px;          /* base font-size for test content */
+  --lh: 28px;          /* base line-height in px for test content */
+  --letter: 0px;       /* letter spacing */
+  --inline-size: 18em; /* default logical inline-size for test boxes */
+  --block-size: 28em;  /* default logical block-size for test boxes */
+  --baseline-step: 28px; /* overlay grid step; keep in sync with --lh */
+}
+
+*{ box-sizing: border-box; }
+html,body{ margin:0; padding:0; background: var(--bg); color:#111; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Noto Sans CJK JP", "Noto Sans CJK KR", "Microsoft YaHei", Arial, sans-serif; -webkit-font-smoothing:antialiased; }
+a{ color: var(--accent); text-decoration: none; }
+a:hover{ text-decoration: underline; }
+
+/* Header */
+.header{
+  width:100%;
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+}
+.header .inner{
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 18px var(--gutter);
+  display:flex;
+  align-items:baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.header h1{ margin:0; font-size: 22px; font-weight: 700; }
+.header .sub{ color: var(--muted); font-size: 14px; }
+
+/* Layout containers */
+.container{ max-width: var(--maxw); margin: 0 auto; padding: 18px var(--gutter) 48px; }
+.toolbar{
+  background: #fff;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin-bottom: 18px;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 10px;
+}
+.toolbar .group{
+  grid-column: span 4;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  background:#fff;
+}
+.toolbar .group h3{
+  margin: 0 0 8px 0; font-size: 14px; color:#222;
+}
+.toolbar label{ font-size: 13px; color:#333; margin-right: 8px; }
+.toolbar input[type="range"]{ width: 160px; }
+.toolbar .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:6px 0; }
+.toolbar .note{ color: var(--muted); font-size: 12px; }
+
+/* Test area */
+.test-area{
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  min-height: 420px;
+  padding: 16px;
+}
+
+.test-split{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.panel{
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  position:relative;
+}
+.panel h4{
+  margin:0 0 8px 0; font-size: 14px; color:#222;
+}
+
+/* The vertical writing test box (uses logical sizes) */
+.vertical-box{
+  /* These are logical sizes that swap axes with writing-mode */
+  inline-size: var(--inline-size);
+  block-size: var(--block-size);
+  border: 1px solid #d3d6db;
+  background:#fff;
+  padding: 10px;
+  border-radius: 6px;
+  overflow:auto;
+  font-size: var(--fs);
+  line-height: var(--lh);
+  letter-spacing: var(--letter);
+  /* Default writing mode; can be changed via classes */
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  /* Better CJK typographic features if available */
+  font-kerning: normal;
+  font-variant-east-asian: proportional-width;
+}
+
+.vertical-rl{ writing-mode: vertical-rl; }
+.vertical-lr{ writing-mode: vertical-lr; }
+.horizontal-tb{ writing-mode: horizontal-tb; }
+
+/* Text orientation helpers */
+.tor-mixed{ text-orientation: mixed; }
+.tor-upright{ text-orientation: upright; }
+.tor-sideways{ text-orientation: sideways; }
+
+/* Optional: force upright for specific spans */
+.force-upright{ text-orientation: upright; }
+.force-sideways{ text-orientation: sideways; }
+
+/* For digit combinations in vertical writing */
+.tcu-all{ text-combine-upright: all; }
+.tcu-d2{ text-combine-upright: digits 2; }
+
+/* Baseline overlay (visual only, does not affect layout) */
+.overlay-baseline{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+  display:none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(13,110,253,0.16) 0px,
+    rgba(13,110,253,0.16) 1px,
+    transparent 1px,
+    transparent var(--baseline-step)
+  );
+}
+
+/* Debug outlines to see block boundaries (applies inside .test-area) */
+.debug-outline .vertical-box *{
+  outline: 1px dashed rgba(0,0,0,0.25);
+  outline-offset: -1px;
+}
+
+/* Common prose content styling */
+.sample p{ margin: 0 0 1em 0; }
+.sample ul{ margin: 0 0 1em 1.2em; padding: 0; }
+.sample li{ margin: 0.3em 0; }
+.sample ruby{ background: rgba(255,255,0,0.09); }
+.sample rt{ font-size: 0.6em; color:#666; }
+
+/* Status meter */
+.meters{ display:flex; gap: 12px; flex-wrap:wrap; font-size: 12px; color: #222; }
+.meter{ background:#fff; border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; }
+.meter code{ font-family: var(--font-mono); font-size: 12px; }
+
+/* Explanation section */
+.explain{
+  margin-top: 18px;
+  border: 1px solid var(--border);
+  background:#fff;
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.explain h3{ margin:0 0 8px 0; font-size: 16px; }
+.explain h4{ margin:12px 0 6px 0; font-size: 14px; }
+.explain p, .explain ul{ color:#333; font-size: 14px; line-height: 1.7; }
+
+/* Horizontal reference box */
+.hz-box{
+  border:1px solid #d3d6db; background:#fff; padding:10px; border-radius:6px;
+  font-size: var(--fs); line-height: var(--lh); letter-spacing: var(--letter);
+  writing-mode: horizontal-tb;
+  max-height: 100%;
+  overflow:auto;
+}
+
+/* Flex/Grid lab */
+.lab{
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+.lab .slot{ grid-column: span 6; }
+.flex-lab{
+  display: flex;
+  gap: 12px;
+  border: 1px solid var(--border);
+  padding: 10px;
+  background:#fff;
+  border-radius: 8px;
+  min-height: 240px;
+  align-items: stretch;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+}
+.flex-item{ background: var(--panel-bg); border:1px solid var(--border); border-radius:6px; padding:8px; display:flex; align-items:center; justify-content:center; }
+
+.grid-lab{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  border: 1px solid var(--border);
+  padding: 10px;
+  background:#fff;
+  border-radius: 8px;
+  min-height: 240px;
+  align-items: stretch;
+  justify-items: stretch;
+}
+
+/* Small helpers */
+.badge{ display:inline-block; padding:2px 6px; border:1px solid var(--border); border-radius:4px; font-size:12px; background:#fff; color:#333; }
+hr.div{ border: none; border-top: 1px dashed var(--border); margin: 10px 0; }

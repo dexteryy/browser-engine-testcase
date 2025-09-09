@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>测试用例1：Flexbox弹性布局与动态重排 — flex-grow vs flex-basis 对比</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="page">
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="inner">
+      <div>
+        <div class="title">测试用例1：Flexbox弹性布局与动态重排 · flex-grow vs flex-basis 对比</div>
+        <div class="subtitle">对比两种尺寸变化方式对重排范围与视觉稳定性的影响</div>
+      </div>
+      <div><span class="badge">CSS 纯交互 · 无 JS</span></div>
+    </div>
+  </header>
+
+  <!-- Toolbar -->
+  <form class="toolbar" aria-label="工具栏：通用参数">
+    <fieldset class="control-group">
+      <legend>间距</legend>
+      <input type="radio" name="gap" id="gap-8">
+      <label for="gap-8">8px</label>
+      <input type="radio" name="gap" id="gap-16" checked>
+      <label for="gap-16">16px</label>
+      <input type="radio" name="gap" id="gap-24">
+      <label for="gap-24">24px</label>
+    </fieldset>
+
+    <fieldset class="control-group">
+      <legend>过渡时间</legend>
+      <input type="radio" name="dur" id="dur-015">
+      <label for="dur-015">0.15s</label>
+      <input type="radio" name="dur" id="dur-03" checked>
+      <label for="dur-03">0.3s</label>
+      <input type="radio" name="dur" id="dur-06">
+      <label for="dur-06">0.6s</label>
+    </fieldset>
+  </form>
+
+  <!-- Test area -->
+  <section class="test-area section">
+    <h2>测试区域</h2>
+    <div class="side-by-side">
+      <div class="side">
+        <strong>容器A：使用 <code>flex-grow</code> 扩展（悬停）</strong>
+        <div class="flexroot grow-demo row-fixed-height" aria-label="使用 flex-grow 的容器">
+          <article class="item"><h3>A-1</h3><p>默认 <code>flex:1</code>，悬停时 <code>flex-grow:3</code>。</p></article>
+          <article class="item"><h3>A-2</h3><p>观察兄弟项收缩的平滑度与文字换行。</p></article>
+          <article class="item"><h3>A-3</h3><p>确认容器边界内无溢出或遮挡。</p></article>
+        </div>
+      </div>
+      <div class="side">
+        <strong>容器B：使用 <code>flex-basis</code> 扩展（悬停）</strong>
+        <div class="flexroot basis-demo row-fixed-height" aria-label="使用 flex-basis 的容器">
+          <article class="item"><h3>B-1</h3><p>默认 <code>flex-basis:0</code>，悬停时 <code>flex-basis:40%</code>。</p></article>
+          <article class="item"><h3>B-2</h3><p>对比与容器A在布局稳定性上的差异。</p></article>
+          <article class="item"><h3>B-3</h3><p>查看布局偏移高亮的覆盖范围差异。</p></article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Explanation -->
+  <section class="explain">
+    <h3>解释说明</h3>
+    <p><strong>测试目标：</strong>对比 <code>flex-grow</code> 与 <code>flex-basis</code> 两种扩展方式在重排范围、兄弟项压缩策略、文本换行与视觉平滑度方面的差异。</p>
+    <p><strong>测试方案：</strong>两个并列容器分别使用不同属性在悬停时变化，均保持相同的过渡时长和间距，便于对比。</p>
+    <p><strong>使用方法：</strong>分别在 A 与 B 的任意子项悬停，观察其它子项与整体容器的响应；结合工具栏调整过渡时长与间距以放大差异。</p>
+    <p><strong>查看/检验/评估结果：</strong>在 Performance 中对两侧进行独立录制，对比 Recalculate Style/Layout 的耗时与受影响节点数；视觉上不应出现闪烁或断裂。</p>
+  </section>
+</body>
+</html>

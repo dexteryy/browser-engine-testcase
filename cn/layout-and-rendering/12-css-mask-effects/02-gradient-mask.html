@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>12-2 渐变遮罩与半透明边缘</title>
+  <link rel="stylesheet" href="./assets/common.css">
+  <style>
+  .workbench{display:flex;gap:18px;align-items:flex-start;}
+  .workbench .box{width:520px;height:320px;border-radius:12px;}
+  .note{font-size:12px;color:#6b7280;}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="container">
+      <h1 class="title">12-2 渐变遮罩与半透明边缘</h1>
+      <p class="desc">使用 CSS 渐变作为遮罩，观察边缘的平滑淡出与透明过渡是否正确。</p>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="container">
+      <div class="control">
+        <label>渐变类型</label>
+        <select id="gType">
+          <option value="radial">径向渐变</option>
+          <option value="linear">线性渐变</option>
+        </select>
+      </div>
+      <div class="control">
+        <label>mask-mode</label>
+        <select id="gMode">
+          <option value="alpha">alpha（用透明度过渡）</option>
+          <option value="luminance">luminance（用明暗过渡）</option>
+        </select>
+      </div>
+      <div class="control">
+        <label><span id="labelA">中心X</span></label>
+        <input id="a" type="range" min="0" max="100" value="50"/>
+        <div class="value"><span id="av">50%</span></div>
+      </div>
+      <div class="control">
+        <label><span id="labelB">中心Y/角度</span></label>
+        <input id="b" type="range" min="0" max="100" value="50"/>
+        <div class="value"><span id="bv">50%</span></div>
+      </div>
+      <div class="control">
+        <label>内/外半径或起止位置</label>
+        <input id="r1" type="range" min="0" max="100" value="40"/>
+        <div class="value">内：<span id="r1v">40%</span></div>
+        <input id="r2" type="range" min="0" max="100" value="70"/>
+        <div class="value">外：<span id="r2v">70%</span></div>
+      </div>
+      <button class="btn" id="copyCss">复制当前 CSS</button>
+      <div class="status"><span class="badge">实时预览</span></div>
+    </div>
+  </div>
+
+  <div class="section container">
+    <div class="workbench">
+      <div class="card">
+        <h3>遮罩元素</h3>
+        <div class="box mask-target checker" id="maskTarget">
+          <div class="transparent-backdrop"></div>
+          <div class="photo"></div>
+        </div>
+      </div>
+      <div class="card" style="flex:1">
+        <h3>当前 CSS</h3>
+        <pre><code id="cssOut"></code></pre>
+        <p class="note">提示：当 <code>mask-mode = alpha</code> 时，渐变各色的 <strong>alpha 值</strong> 决定遮罩强度；当为 <code>luminance</code> 时，<strong>颜色亮度</strong>（黑→白）决定遮罩强度。</p>
+        <table class="metrix">
+          <thead><tr><th>指标</th><th>数值</th></tr></thead>
+          <tbody>
+            <tr><td>可见边缘平滑</td><td>应无明显锯齿</td></tr>
+            <tr><td>透明过渡</td><td>应从完全不透明平滑过渡到完全透明</td></tr>
+            <tr><td>布局影响</td><td>遮罩不改变元素盒模型</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section container">
+    <div class="explain">
+      <h2>解释说明</h2>
+      <ul class="list">
+        <li><strong>测试目标：</strong>验证半透明渐变遮罩的可视品质与比例缩放的正确性。</li>
+        <li><strong>使用方法：</strong>调节中心/角度、内外半径或起止位置，观察内容是否按预期淡出、透明区域可透出底色。</li>
+        <li><strong>检验方法：</strong>缩放窗口和 DPR（高分屏）下检查边缘品质是否稳定。</li>
+      </ul>
+    </div>
+  </div>
+
+  <script type="module">
+    import {qs, byId, on, copy, number} from './assets/common.js';
+    const el = byId('maskTarget');
+    const gType = byId('gType');
+    const gMode = byId('gMode');
+    const a = byId('a'); const b = byId('b'); const r1 = byId('r1'); const r2 = byId('r2');
+    const av = byId('av'); const bv = byId('bv'); const r1v=byId('r1v'); const r2v=byId('r2v');
+    const labelA = byId('labelA'); const labelB = byId('labelB');
+    const cssOut = byId('cssOut'); const copyCss = byId('copyCss');
+
+    function updateLabels(){
+      av.textContent = a.value + '%';
+      if (gType.value==='linear'){ bv.textContent = (Math.round(b.value*3.6)) + '°'; }
+      else { bv.textContent = b.value + '%'; }
+      r1v.textContent = r1.value + '%'; r2v.textContent = r2.value + '%';
+      labelA.textContent = gType.value==='linear' ? '方向（保留）' : '中心X';
+      labelB.textContent = gType.value==='linear' ? '角度' : '中心Y/角度';
+    }
+
+    function maskImage(){
+      const mode = gMode.value;
+      if (gType.value === 'radial'){
+        const cx = a.value, cy = b.value;
+        const inner = Math.min(r1.value, r2.value);
+        const outer = Math.max(r1.value, r2.value);
+        if(mode==='alpha'){
+          return `radial-gradient(circle at ${cx}% ${cy}%, rgba(0,0,0,1) ${inner}%, rgba(0,0,0,0) ${outer}%)`;
+        }else{
+          return `radial-gradient(circle at ${cx}% ${cy}%, hsl(0 0% 100%) ${inner}%, hsl(0 0% 0%) ${outer}%)`;
+        }
+      }else{ // linear
+        const angle = Math.round(b.value*3.6);
+        const start = Math.min(r1.value, r2.value);
+        const end = Math.max(r1.value, r2.value);
+        if(gMode.value==='alpha'){
+          return `linear-gradient(${angle}deg, rgba(0,0,0,1) ${start}%, rgba(0,0,0,0) ${end}%)`;
+        }else{
+          return `linear-gradient(${angle}deg, hsl(0 0% 100%) ${start}%, hsl(0 0% 0%) ${end}%)`;
+        }
+      }
+    }
+
+    function apply(){
+      const img = maskImage();
+      el.style.maskImage = img;
+      el.style.maskMode = gMode.value;
+      el.style.maskRepeat = 'no-repeat';
+      el.style.maskSize = '100% 100%';
+      el.style.maskPosition = 'center';
+
+      const css = `mask-image: ${img};\nmask-mode: ${gMode.value};\nmask-size: 100% 100%;\nmask-position: center;\nmask-repeat: no-repeat;`;
+      cssOut.textContent = css;
+    }
+
+    [gType,gMode,a,b,r1,r2].forEach(x=>on(x, 'input', ()=>{updateLabels(); apply();}));
+    on(copyCss,'click', ()=> navigator.clipboard.writeText(cssOut.textContent));
+
+    updateLabels(); apply();
+  </script>
+</body>
+</html>

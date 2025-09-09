@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>测试用例1：Flexbox弹性布局与动态重排 — 多层嵌套与对齐</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="page">
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="inner">
+      <div>
+        <div class="title">测试用例1：Flexbox弹性布局与动态重排 · 多层嵌套与对齐</div>
+        <div class="subtitle">验证多层 Flex 容器在不同对齐方式下的重排与边界条件</div>
+      </div>
+      <div><span class="badge">CSS 纯交互 · 无 JS</span></div>
+    </div>
+  </header>
+
+  <!-- Toolbar -->
+  <form class="toolbar" aria-label="工具栏：外层/内层对齐参数">
+    <fieldset class="control-group">
+      <legend>外层 align-items</legend>
+      <input type="radio" name="outer-ai" id="outer-ai-stretch" checked>
+      <label for="outer-ai-stretch">stretch</label>
+      <input type="radio" name="outer-ai" id="outer-ai-center">
+      <label for="outer-ai-center">center</label>
+      <input type="radio" name="outer-ai" id="outer-ai-start">
+      <label for="outer-ai-start">flex-start</label>
+    </fieldset>
+
+    <fieldset class="control-group">
+      <legend>内层 align-items</legend>
+      <input type="radio" name="inner-ai" id="inner-ai-stretch" checked>
+      <label for="inner-ai-stretch">stretch</label>
+      <input type="radio" name="inner-ai" id="inner-ai-center">
+      <label for="inner-ai-center">center</label>
+      <input type="radio" name="inner-ai" id="inner-ai-start">
+      <label for="inner-ai-start">flex-start</label>
+    </fieldset>
+
+    <fieldset class="control-group">
+      <legend>方向</legend>
+      <input type="radio" name="dir" id="dir-row" checked>
+      <label for="dir-row">row</label>
+      <input type="radio" name="dir" id="dir-col">
+      <label for="dir-col">column</label>
+    </fieldset>
+
+    <fieldset class="control-group">
+      <legend>过渡时间</legend>
+      <input type="radio" name="dur" id="dur-015">
+      <label for="dur-015">0.15s</label>
+      <input type="radio" name="dur" id="dur-03" checked>
+      <label for="dur-03">0.3s</label>
+      <input type="radio" name="dur" id="dur-06">
+      <label for="dur-06">0.6s</label>
+    </fieldset>
+  </form>
+
+  <!-- Test area -->
+  <section class="test-area section">
+    <h2>测试区域</h2>
+    <div class="flexroot outer row-fixed-height" aria-label="外层容器">
+      <article class="item hover-grow">
+        <h3>外层子项A（可扩展）</h3>
+        <p>用于模拟一侧内容较多的情况，悬停扩展时应推动中间与右侧区域重排。</p>
+      </article>
+
+      <article class="item">
+        <h3>外层子项B（含内层容器）</h3>
+        <p>下方为纵向的内层容器，每个子项在悬停时扩大占比；其中一个子项使用 <code>align-self</code> 覆盖内层对齐设置。</p>
+        <div class="nested inner" style="flex-direction: column;" aria-label="内层容器（纵向）">
+          <div class="n-item" title="悬停扩展">B-1</div>
+          <div class="n-item" style="align-self: center; min-height: 90px;" title="此项使用 align-self 覆盖内层对齐">B-2（align-self:center）</div>
+          <div class="n-item" title="悬停扩展">B-3</div>
+        </div>
+      </article>
+
+      <article class="item hover-grow">
+        <h3>外层子项C（图片 + 文本）</h3>
+        <img class="thumb" alt="占位图像" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Crect width='100%25' height='100%25' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='36' fill='%236b7280'%3EInner%20Img%3C/text%3E%3C/svg%3E">
+        <p>图像 <code>max-width:100%</code> 与固定纵横比，验证在压缩/拉伸时不会溢出。</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- Explanation -->
+  <section class="explain">
+    <h3>解释说明</h3>
+    <p><strong>测试目标：</strong>聚焦多层嵌套的 Flex 布局在不同对齐策略下的表现；当内/外层子项悬停扩展时，应仅影响相应层级的布局。</p>
+    <p><strong>测试方案：</strong>外层为横向 Flex，内层为纵向 Flex。通过工具栏可以分别改变外层与内层的 <code>align-items</code>。部分内层子项设置 <code>align-self</code> 与较大的 <code>min-height</code> 以覆盖或约束布局。</p>
+    <p><strong>使用方法：</strong>先切换对齐参数，再在外层子项 A/C 或任意内层子项上悬停，观察另一层级是否按预期压缩/对齐，确保无遮挡与溢出。</p>
+    <p><strong>查看/检验/评估结果：</strong>开启 “Show layout shift regions”，观察高亮是否主要集中在对应层级；在 Performance 中可比对外层扩展与内层扩展的重排范围差异。</p>
+  </section>
+</body>
+</html>

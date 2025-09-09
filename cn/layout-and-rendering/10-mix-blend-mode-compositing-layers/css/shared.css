@@ -1,0 +1,284 @@
+/* Shared styles for Test Case 10 - all comments are in English per requirement */
+:root {
+  --container: 1100px;
+  --border: #e5e7eb;
+  --muted: #666;
+  --accent: #0b5cff;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+        "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", Arial, sans-serif;
+  background: #fff;
+  color: #111;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  z-index: 100;
+}
+.header .inner {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.header h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+.header p {
+  margin: 0;
+  color: #555;
+}
+
+.section {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fafafa;
+}
+.toolbar label {
+  display: block;
+  font-weight: 600;
+  font-size: 12px;
+  color: #444;
+  margin-bottom: 6px;
+}
+.toolbar .inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.toolbar input[type="color"],
+.toolbar select,
+.toolbar input[type="number"],
+.toolbar input[type="range"],
+.toolbar button,
+.toolbar input[type="text"] {
+  width: 100%;
+}
+.toolbar .hint { color: var(--muted); font-size: 12px; }
+
+.stage-wrap {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff;
+}
+.stage {
+  position: relative;
+  overflow: hidden;
+  height: 420px;
+  border-radius: 8px;
+  /* subtle checkerboard to help observe blending over white page background */
+  background-image:
+    linear-gradient(45deg, #f5f5f5 25%, transparent 25%),
+    linear-gradient(-45deg, #f5f5f5 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #f5f5f5 75%),
+    linear-gradient(-45deg, transparent 75%, #f5f5f5 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+.bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 70%;
+  background: #0000ff; /* pure blue as default */
+}
+
+.blend-box {
+  position: absolute;
+  left: 30%;
+  top: 20%;
+  width: 320px;
+  height: 200px;
+  background: rgba(255, 0, 0, .5);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  user-select: none;
+  cursor: grab;
+}
+
+.blend-box.dragging { cursor: grabbing; }
+
+.blend-box .inner-text {
+  pointer-events: none;
+  font-weight: 700;
+  text-shadow: 0 1px 1px rgba(0,0,0,.12);
+}
+
+.small-note { font-size: 12px; color: #666; }
+
+.explain {
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff;
+}
+.code-like {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #f2f4f5;
+  border: 1px solid #e5e7eb;
+}
+
+/* Panels on the text-image page */
+.panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.panel {
+  position: relative;
+  height: 420px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+.panel .panel-title {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  font-size: 12px;
+  color: #444;
+  background: rgba(255,255,255,.8);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.text-area {
+  position: absolute;
+  inset: 0;
+  background: #1140ff;
+  display: grid;
+  place-items: center;
+}
+.text-sample {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+}
+.text-sample .white { color: #fff; font-weight: 800; font-size: 48px; }
+.text-sample .black { color: #000; font-weight: 800; font-size: 48px; }
+
+.img-area {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #222, #999);
+  display: grid;
+  place-items: center;
+}
+.img-area img {
+  max-width: 75%;
+  max-height: 75%;
+  display: block;
+}
+
+/* Layer boxes layout */
+.layer-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.layer-box {
+  position: relative;
+  height: 200px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+.layer-box .bg {
+  width: 100%;
+  height: 100%;
+  background: #007bff;
+}
+.layer-box .blend {
+  position: absolute;
+  left: 20%;
+  top: 20%;
+  width: 60%;
+  height: 60%;
+  background: rgba(255, 0, 0, .5);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+}
+.layer-box .label {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  font-size: 12px;
+  background: rgba(255,255,255,.9);
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Perf page */
+.badges { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.badge { border: 1px solid var(--border); padding: 2px 8px; border-radius: 999px; background: #fff; font-size: 12px; }
+.badge.good { background: #eaffea; border-color: #c7e7c7; }
+.badge.warn { background: #fff6db; border-color: #f3e3a3; }
+.badge.bad { background: #ffe8e8; border-color: #f0b9b9; }
+
+.perf-stage {
+  position: relative;
+  height: 480px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background-image:
+    linear-gradient(45deg, #f5f5f5 25%, transparent 25%),
+    linear-gradient(-45deg, #f5f5f5 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #f5f5f5 75%),
+    linear-gradient(-45deg, transparent 75%, #f5f5f5 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+.blob {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: rgba(255,0,0,.5);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  user-select: none;
+  will-change: transform;
+}

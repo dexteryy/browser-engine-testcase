@@ -1,0 +1,162 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>测试用例2C：双轴 Subgrid（列+行）</title>
+  <link rel="stylesheet" href="assets/style.css"/>
+  <style>
+    /* ========== Page 2C specific styles ========== */
+    .grid-root.both-demo {
+      /* 3 columns + 3 rows with names */
+      --cols: [left-start] 240px
+              [left-end main-start] 2fr
+              [main-end right-start] 1fr
+              [right-end];
+      --rows: [top-start] 64px
+              [top-end mid-start] 1fr
+              [mid-end bottom-start] 1fr
+              [bottom-end];
+      grid-template-columns: var(--cols);
+      grid-template-rows: var(--rows);
+      height: 520px;
+    }
+    @media (max-width: 880px) {
+      .grid-root.both-demo {
+        --cols: [main-start] 3fr [main-end right-start] 2fr [right-end];
+      }
+    }
+    @media (max-width: 620px) {
+      .grid-root.both-demo {
+        --cols: [main-start] 1fr [main-end];
+        --rows: [top-start] auto [top-end mid-start] 1fr [mid-end bottom-start] 1fr [bottom-end];
+      }
+    }
+
+    .header { grid-column: left-start / right-end; grid-row: top-start / top-end; background:#f8fafc; }
+    .aside  { grid-column: left-start / left-end;  grid-row: mid-start / bottom-end; }
+    .main   { grid-column: main-start / right-end; grid-row: mid-start / bottom-end; }
+
+    /* Subgrid area that spans both axes */
+    .mini {
+      grid-column: main-start / right-end;
+      grid-row: mid-start / bottom-end;
+      display: grid;
+      grid-template-columns: subgrid;
+      grid-template-rows: subgrid;
+      gap: var(--gap);
+      border: 1px dashed #fbbf24;
+      background: #fffdf5;
+      padding: 8px;
+    }
+    .mini .box {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 8px;
+    }
+    /* Place children by names (both axes) */
+    .mini .b1 { grid-column: main-start / main-end; grid-row: mid-start / bottom-end; }
+    .mini .b2 { grid-column: main-end / right-end; grid-row: mid-start / mid-end; }
+    .mini .b3 { grid-column: main-end / right-end; grid-row: mid-end / bottom-end; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="inner">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline;">
+        <div>
+          <h1>测试用例2C：双轴 Subgrid（列 + 行）</h1>
+          <p>验证子网格在<strong>列与行</strong>同时继承父网格轨道，内部元素可跨父子层级精确对齐。</p>
+        </div>
+        <div class="note" id="support-note">浏览器支持：检测中…</div>
+      </div>
+      <div class="pages">
+        页面导航：
+        <a href="./index.html">2A 列</a> ·
+        <a href="./rows-subgrid.html">2B 行</a> ·
+        <a href="./both-axes.html">2C 双轴</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="toolbar">
+      <div class="tool">
+        <label for="gap">间隙（gap）：</label>
+        <input id="gap" type="range" min="0" max="40" step="1" value="16" />
+        <span class="value" id="gap-val">16px</span>
+      </div>
+      <div class="tool">
+        <input id="show-parent" type="checkbox" />
+        <label for="show-parent">显示父网格线</label>
+      </div>
+      <div class="tool">
+        <input id="show-sub" type="checkbox" />
+        <label for="show-sub">显示子网格线</label>
+      </div>
+      <div class="tool">
+        <button class="btn" id="measure">测量一次重排耗时</button>
+        <span class="value" id="time">–</span>
+      </div>
+    </section>
+
+    <section class="test-area">
+      <div class="grid-root both-demo" id="root">
+        <div class="grid-item header"><strong>页眉</strong>（跨全宽，固定高）</div>
+        <div class="grid-item aside"><strong>左侧固定区</strong>（仅在宽视口出现）</div>
+        <div class="panel mini" id="mini">
+          <div class="box b1"><strong>框 1</strong>：列用 <code>main-start / main-end</code>，行用 <code>mid-start / bottom-end</code>。</div>
+          <div class="box b2"><strong>框 2</strong>：列用 <code>main-end / right-end</code>，行用 <code>mid-start / mid-end</code>。</div>
+          <div class="box b3"><strong>框 3</strong>：列用 <code>main-end / right-end</code>，行用 <code>mid-end / bottom-end</code>。</div>
+        </div>
+      </div>
+      <p class="note">提示：在较窄视口下左侧列会折叠，子网格仍应与父级剩余轨道对齐。</p>
+    </section>
+
+    <section class="explain">
+      <h2>解释说明</h2>
+      <div class="kv">
+        <div>测试目标</div>
+        <div>验证子网格在<strong>双轴</strong>继承时，内部元素既能对齐父列线，也能对齐父行线；响应式断点变化后仍保持一致。</div>
+
+        <div>测试方案</div>
+        <div>父网格为 3 列 3 行（含命名网格线）；子容器 <code>.mini</code> 跨越右侧两列与下方两行，并开启 <code>subgrid</code>（列、行同时使用）；子项通过命名行在两轴上对齐。</div>
+
+        <div>使用方法</div>
+        <div>1) 勾选“显示父网格线/子网格线”；2) 调整 gap；3) 缩放窗口测试断点；4) 观察子项四边与父级对应网格线是否重合。</div>
+
+        <div>评估结果</div>
+        <div>正常情况下：父网格线与子网格线在两轴完全重合；缩放窗口后仍一致；布局无错位和异常滚动。</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/app.js"></script>
+  <script>
+    const { $, GridOverlay, supportsSubgrid, bindGap, measureReflow } = window.GridHarness;
+    const root = $('#root'), mini = $('#mini');
+    const ok = supportsSubgrid();
+    $('#support-note').textContent = ok ? '浏览器支持：Subgrid ✓' : '浏览器支持：Subgrid ✗（本页功能受限）';
+    $('#support-note').style.color = ok ? '#0a7f49' : '#c12a2a';
+    bindGap($('#gap'), root, $('#gap-val'));
+
+    const ovParent = new GridOverlay(root, 'both');
+    const ovChild  = new GridOverlay(mini, 'both', { useSubgrid: true });
+    ovParent.setEnabled(false);
+    ovChild.setEnabled(false);
+
+    $('#show-parent').addEventListener('change', e => ovParent.setEnabled(e.target.checked));
+    $('#show-sub').addEventListener('change', e => ovChild.setEnabled(e.target.checked));
+
+    // Simple reflow timing: toggle a small size change
+    $('#measure').addEventListener('click', async () => {
+      const prev = parseFloat(getComputedStyle(root).gap) || 16;
+      const ms = await measureReflow(() => root.style.gap = (prev + 1) + 'px', root);
+      document.getElementById('time').textContent = ms.toFixed(2) + ' ms';
+      root.style.gap = prev + 'px';
+    });
+  </script>
+</body>
+</html>

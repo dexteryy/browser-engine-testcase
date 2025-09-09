@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>浏览器引擎测试用例集合</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        line-height: 1.6;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem 1rem;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 3rem 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .header::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        opacity: 0.3;
+        z-index: 1;
+      }
+
+      .header > * {
+        position: relative;
+        z-index: 2;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .header .subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 1rem;
+      }
+
+      .stats {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 1rem;
+      }
+
+      .stat-item {
+        text-align: center;
+      }
+
+      .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        display: block;
+      }
+
+      .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+
+      .content {
+        padding: 2rem;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+      }
+
+      .search-box {
+        position: relative;
+        flex: 1;
+        max-width: 300px;
+      }
+
+      .search-box input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.3s ease;
+      }
+
+      .search-box input:focus {
+        border-color: #667eea;
+      }
+
+      .search-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+      }
+
+      .view-controls {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid #e1e5e9;
+        background: white;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+      }
+
+      .btn:hover {
+        background: #f8f9fa;
+      }
+
+      .btn.active {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+      }
+
+      .category-section {
+        margin-bottom: 2rem;
+      }
+
+      .category-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .category-header:hover {
+        background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+      }
+
+      .category-icon {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #667eea;
+        color: white;
+        border-radius: 50%;
+        font-size: 0.8rem;
+        font-weight: bold;
+      }
+
+      .category-title {
+        flex: 1;
+      }
+
+      .category-title h2 {
+        font-size: 1.3rem;
+        color: #1e3c72;
+        margin-bottom: 0.25rem;
+      }
+
+      .category-description {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin: 0;
+      }
+
+      .category-stats {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.85rem;
+        color: #6c757d;
+      }
+
+      .expand-icon {
+        transition: transform 0.3s ease;
+      }
+
+      .category-section.collapsed .expand-icon {
+        transform: rotate(-90deg);
+      }
+
+      .test-cases {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1rem;
+        margin-left: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .category-section.collapsed .test-cases {
+        display: none;
+      }
+
+      .test-card {
+        background: white;
+        border: 1px solid #e1e5e9;
+        border-radius: 8px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .test-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+      }
+
+      .test-card:hover::before {
+        transform: scaleX(1);
+      }
+
+      .test-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        border-color: #667eea;
+      }
+
+      .test-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1e3c72;
+        margin-bottom: 0.5rem;
+        text-decoration: none;
+        display: block;
+      }
+
+      .test-title:hover {
+        color: #667eea;
+      }
+
+      .test-description {
+        font-size: 0.9rem;
+        color: #6c757d;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+      }
+
+      .test-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+        color: #adb5bd;
+      }
+
+      .test-type {
+        padding: 0.2rem 0.5rem;
+        background: #e7f3ff;
+        color: #0d6efd;
+        border-radius: 4px;
+        font-weight: 500;
+      }
+
+      .list-view .test-cases {
+        grid-template-columns: 1fr;
+      }
+
+      .list-view .test-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+      }
+
+      .list-view .test-card::before {
+        display: none;
+      }
+
+      .list-view .test-content {
+        flex: 1;
+      }
+
+      .list-view .test-title {
+        margin-bottom: 0.25rem;
+      }
+
+      .list-view .test-description {
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+      }
+
+      .list-view .test-meta {
+        margin: 0;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .stats {
+          gap: 1rem;
+        }
+
+        .controls {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .search-box {
+          max-width: none;
+          order: -1;
+        }
+
+        .test-cases {
+          grid-template-columns: 1fr;
+          margin-left: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🚀 浏览器引擎测试用例集合</h1>
+        <p class="subtitle">Chrome浏览器现代CSS布局与渲染特性测试套件</p>
+        <div class="stats">
+          <div class="stat-item">
+            <span class="stat-number">12</span>
+            <span class="stat-label">测试分类</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">47</span>
+            <span class="stat-label">测试页面</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">100%</span>
+            <span class="stat-label">现代化标准</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="controls">
+          <div class="search-box">
+            <input type="text" id="searchInput" placeholder="搜索测试用例..." />
+            <span class="search-icon">🔍</span>
+          </div>
+          <div class="view-controls">
+            <button class="btn active" id="gridViewBtn">网格视图</button>
+            <button class="btn" id="listViewBtn">列表视图</button>
+            <button class="btn" id="expandAllBtn">展开全部</button>
+            <button class="btn" id="collapseAllBtn">收起全部</button>
+          </div>
+        </div>
+
+        <div id="testCategories">
+          <!-- 01. Flexbox弹性布局与动态重排 -->
+          <div class="category-section" data-category="flexbox">
+            <div class="category-header" onclick="toggleCategory(this)">
+              <div class="category-icon">01</div>
+              <div class="category-title">
+                <h2>Flexbox弹性布局与动态重排</h2>
+                <p class="category-description">
+                  验证主轴/侧轴对齐、间距与子项悬停扩展时的重排正确性
+                </p>
+              </div>
+              <div class="category-stats">
+                <span>4个测试</span>
+                <span>•</span>
+                <span>基础布局</span>
+              </div>
+              <div class="expand-icon">▼</div>
+            </div>
+            <div class="test-cases">
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/01-flexbox-dynamic-reflow/basic.html"
+                  class="test-title"
+                  >基础与悬停扩展</a
+                >
+                <p class="test-description">
+                  验证主轴/侧轴对齐、间距与子项悬停扩展时的重排正确性
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">交互</span>
+                  <span>basic.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/01-flexbox-dynamic-reflow/basis-vs-grow.html"
+                  class="test-title"
+                  >flex-grow vs flex-basis 对比</a
+                >
+                <p class="test-description">
+                  对比两种尺寸变化方式对重排范围与视觉稳定性的影响
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">对比</span>
+                  <span>basis-vs-grow.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/01-flexbox-dynamic-reflow/nested.html"
+                  class="test-title"
+                  >多层嵌套与对齐</a
+                >
+                <p class="test-description">
+                  验证多层Flex容器在不同对齐方式下的重排与边界条件
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">嵌套</span>
+                  <span>nested.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/01-flexbox-dynamic-reflow/wrap.html"
+                  class="test-title"
+                  >多行换行与 align-content</a
+                >
+                <p class="test-description">
+                  验证换行（flex-wrap）与跨行对齐（align-content）在动态扩展时的重排行为
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">换行</span>
+                  <span>wrap.html</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 02. Grid子网格 -->
+          <div class="category-section" data-category="grid">
+            <div class="category-header" onclick="toggleCategory(this)">
+              <div class="category-icon">02</div>
+              <div class="category-title">
+                <h2>Grid子网格</h2>
+                <p class="category-description">
+                  验证子网格在不同方向的继承与对齐特性
+                </p>
+              </div>
+              <div class="category-stats">
+                <span>3个测试</span>
+                <span>•</span>
+                <span>现代布局</span>
+              </div>
+              <div class="expand-icon">▼</div>
+            </div>
+            <div class="test-cases">
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/02-grid-subgrid/index.html"
+                  class="test-title"
+                  >列方向 Subgrid 对齐</a
+                >
+                <p class="test-description">
+                  验证子网格在列方向继承父网格轨道，并按父级命名网格线对齐
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">列对齐</span>
+                  <span>index.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/02-grid-subgrid/rows-subgrid.html"
+                  class="test-title"
+                  >行方向 Subgrid 对齐</a
+                >
+                <p class="test-description">
+                  验证子网格在行方向继承父网格轨道，跨多行区域保持边界对齐
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">行对齐</span>
+                  <span>rows-subgrid.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/02-grid-subgrid/both-axes.html"
+                  class="test-title"
+                  >双轴 Subgrid（列+行）</a
+                >
+                <p class="test-description">
+                  验证子网格在列与行同时继承父网格轨道，内部元素可跨父子层级精确对齐
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">双轴</span>
+                  <span>both-axes.html</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 03. 多列布局与内容分栏 -->
+          <div class="category-section" data-category="multicolumn">
+            <div class="category-header" onclick="toggleCategory(this)">
+              <div class="category-icon">03</div>
+              <div class="category-title">
+                <h2>多列布局与内容分栏</h2>
+                <p class="category-description">
+                  评估Chrome对CSS多栏布局（columns）的渲染正确性与性能
+                </p>
+              </div>
+              <div class="category-stats">
+                <span>6个测试</span>
+                <span>•</span>
+                <span>分栏布局</span>
+              </div>
+              <div class="expand-icon">▼</div>
+            </div>
+            <div class="test-cases">
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/03-multicolumn-fragmentation/index.html"
+                  class="test-title"
+                  >多列布局总览</a
+                >
+                <p class="test-description">
+                  用于评估Chrome对CSS多栏布局（columns）的渲染正确性与性能
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">总览</span>
+                  <span>index.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/03-multicolumn-fragmentation/fixed-count.html"
+                  class="test-title"
+                  >固定列数测试</a
+                >
+                <p class="test-description">
+                  关注固定列数情况下的文本/图片分栏、列间距与列分隔线渲染
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">固定列数</span>
+                  <span>fixed-count.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/03-multicolumn-fragmentation/column-width.html"
+                  class="test-title"
+                  >固定列宽测试</a
+                >
+                <p class="test-description">
+                  关注根据列宽自动计算列数的布局表现，以及容器宽度变化时的重排与性能
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">固定列宽</span>
+                  <span>column-width.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/03-multicolumn-fragmentation/column-span.html"
+                  class="test-title"
+                  >跨栏元素测试</a
+                >
+                <p class="test-description">
+                  关注 column-span: all 是否生效、跨栏元素的定位与相邻内容的衔接
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">跨栏</span>
+                  <span>column-span.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/03-multicolumn-fragmentation/fragmentation-stress.html"
+                  class="test-title"
+                  >复杂分栏与避断压力测试</a
+                >
+                <p class="test-description">
+                  关注长内容、多图与避断规则下的首次渲染时间与滚动性能
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">性能</span>
+                  <span>fragmentation-stress.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/03-multicolumn-fragmentation/writing-modes.html"
+                  class="test-title"
+                  >书写方向与列顺序测试</a
+                >
+                <p class="test-description">
+                  关注 writing-mode 与 direction 变化下的列进展方向与内容顺序
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">书写方向</span>
+                  <span>writing-modes.html</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 04. 垂直书写模式与文本方向 -->
+          <div class="category-section" data-category="vertical">
+            <div class="category-header" onclick="toggleCategory(this)">
+              <div class="category-icon">04</div>
+              <div class="category-title">
+                <h2>垂直书写模式与文本方向</h2>
+                <p class="category-description">
+                  验证 vertical-rl / vertical-lr
+                  下中英文混排、字符旋转与布局定位
+                </p>
+              </div>
+              <div class="category-stats">
+                <span>5个测试</span>
+                <span>•</span>
+                <span>国际化</span>
+              </div>
+              <div class="expand-icon">▼</div>
+            </div>
+            <div class="test-cases">
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/04-vertical-writing-mode/index.html"
+                  class="test-title"
+                  >垂直书写模式目录</a
+                >
+                <p class="test-description">
+                  验证 vertical-rl / vertical-lr
+                  下中英文混排、字符旋转与布局定位
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">目录</span>
+                  <span>index.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/04-vertical-writing-mode/01-basic-vertical.html"
+                  class="test-title"
+                  >基础：vertical-rl 与水平对照</a
+                >
+                <p class="test-description">
+                  vertical-rl / vertical-lr 与普通水平文本的并排对比
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">基础</span>
+                  <span>01-basic-vertical.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/04-vertical-writing-mode/02-text-orientation.html"
+                  class="test-title"
+                  >字符方向：mixed / upright / sideways 对比</a
+                >
+                <p class="test-description">
+                  在三个独立竖排列中对比 mixed / upright / sideways
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">字符方向</span>
+                  <span>02-text-orientation.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/04-vertical-writing-mode/03-flex-grid-integration.html"
+                  class="test-title"
+                  >布局整合：垂直容器与 Flex / Grid 对齐</a
+                >
+                <p class="test-description">
+                  垂直书写容器与 Flex/Grid 的尺寸计算与对齐关系
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">布局整合</span>
+                  <span>03-flex-grid-integration.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/04-vertical-writing-mode/04-punctuation-numerals.html"
+                  class="test-title"
+                  >标点与数字：位置、合字与括号</a
+                >
+                <p class="test-description">
+                  竖排中文标点位置、半角/全角对照、数字合字与括号旋转
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">标点符号</span>
+                  <span>04-punctuation-numerals.html</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 05. 媒体查询响应式布局 -->
+          <div class="category-section" data-category="responsive">
+            <div class="category-header" onclick="toggleCategory(this)">
+              <div class="category-icon">05</div>
+              <div class="category-title">
+                <h2>媒体查询响应式布局</h2>
+                <p class="category-description">
+                  验证Chrome对CSS媒体查询的支持，以及响应式布局的稳定性和性能表现
+                </p>
+              </div>
+              <div class="category-stats">
+                <span>1个测试</span>
+                <span>•</span>
+                <span>响应式</span>
+              </div>
+              <div class="expand-icon">▼</div>
+            </div>
+            <div class="test-cases">
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/05-media-queries-responsive-layout/index.html"
+                  class="test-title"
+                  >媒体查询响应式布局</a
+                >
+                <p class="test-description">
+                  验证Chrome对CSS媒体查询的支持，包含断点切换、导航菜单、卡片栅格
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">响应式</span>
+                  <span>index.html</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 06. 容器查询自适应组件 -->
+          <div class="category-section" data-category="container">
+            <div class="category-header" onclick="toggleCategory(this)">
+              <div class="category-icon">06</div>
+              <div class="category-title">
+                <h2>容器查询自适应组件</h2>
+                <p class="category-description">
+                  验证组件根据父容器尺寸自适应布局，独立于视口媒体查询
+                </p>
+              </div>
+              <div class="category-stats">
+                <span>3个测试</span>
+                <span>•</span>
+                <span>现代特性</span>
+              </div>
+              <div class="expand-icon">▼</div>
+            </div>
+            <div class="test-cases">
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/06-container-queries-adaptive-card/index.html"
+                  class="test-title"
+                  >容器查询自适应组件</a
+                >
+                <p class="test-description">
+                  验证组件根据父容器尺寸自适应布局，独立于视口媒体查询
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">基础</span>
+                  <span>index.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/06-container-queries-adaptive-card/nested.html"
+                  class="test-title"
+                  >命名嵌套容器与就近匹配</a
+                >
+                <p class="test-description">
+                  演示多个命名容器同时存在时，组件按"最近命名容器"触发对应的
+                  @container 规则
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">嵌套</span>
+                  <span>nested.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/06-container-queries-adaptive-card/stress.html"
+                  class="test-title"
+                  >大量组件的容器查询切换</a
+                >
+                <p class="test-description">
+                  快速变更容器宽度，观察样式重计算是否局部、是否平滑
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">性能</span>
+                  <span>stress.html</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 07. Shadow DOM样式封装隔离 -->
+          <div class="category-section" data-category="shadow">
+            <div class="category-header" onclick="toggleCategory(this)">
+              <div class="category-icon">07</div>
+              <div class="category-title">
+                <h2>Shadow DOM样式封装隔离</h2>
+                <p class="category-description">
+                  统一风格的多页测试，覆盖基础隔离、slot分发、:host/::slotted选择器
+                </p>
+              </div>
+              <div class="category-stats">
+                <span>5个测试</span>
+                <span>•</span>
+                <span>Web组件</span>
+              </div>
+              <div class="expand-icon">▼</div>
+            </div>
+            <div class="test-cases">
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/07-shadow-style-encapsulation/index.html"
+                  class="test-title"
+                  >Shadow DOM样式封装目录</a
+                >
+                <p class="test-description">
+                  统一风格的多页测试，覆盖基础隔离、slot分发、:host/::slotted选择器以及多实例性能观察
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">目录</span>
+                  <span>index.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/07-shadow-style-encapsulation/01-basic.html"
+                  class="test-title"
+                  >基础隔离</a
+                >
+                <p class="test-description">
+                  验证 Shadow 内部样式不受页面全局 CSS 影响，且不会影响外部
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">基础</span>
+                  <span>01-basic.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/07-shadow-style-encapsulation/02-slotted.html"
+                  class="test-title"
+                  >slot 分发与 ::slotted</a
+                >
+                <p class="test-description">
+                  验证插槽投影节点继承外部样式；可用 ::slotted
+                  在组件内部对其进行限定样式
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">Slot</span>
+                  <span>02-slotted.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/07-shadow-style-encapsulation/03-host.html"
+                  class="test-title"
+                  >:host 选择器</a
+                >
+                <p class="test-description">
+                  演示 :host 与 :host(...)
+                  仅影响宿主本身，不会泄漏到页面其他元素
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">Host</span>
+                  <span>03-host.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/07-shadow-style-encapsulation/04-performance.html"
+                  class="test-title"
+                  >多实例与样式隔离</a
+                >
+                <p class="test-description">
+                  创建大量组件实例，观察样式计算与渲染是否互不干扰
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">性能</span>
+                  <span>04-performance.html</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 08. 复杂选择器与交互状态布局 -->
+          <div class="category-section" data-category="selectors">
+            <div class="category-header" onclick="toggleCategory(this)">
+              <div class="category-icon">08</div>
+              <div class="category-title">
+                <h2>复杂选择器与交互状态布局</h2>
+                <p class="category-description">
+                  评估Chrome对 :has()、:focus-within
+                  等复杂选择器在交互下的支持与性能
+                </p>
+              </div>
+              <div class="category-stats">
+                <span>3个测试</span>
+                <span>•</span>
+                <span>高级选择器</span>
+              </div>
+              <div class="expand-icon">▼</div>
+            </div>
+            <div class="test-cases">
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/08-complex-selectors-interaction/index.html"
+                  class="test-title"
+                  >复杂选择器与交互状态布局 · 主场景</a
+                >
+                <p class="test-description">
+                  评估Chrome对 :has()、:focus-within
+                  等复杂选择器在交互下的支持与性能
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">主场景</span>
+                  <span>index.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/08-complex-selectors-interaction/nested-forms.html"
+                  class="test-title"
+                  >嵌套表单与焦点</a
+                >
+                <p class="test-description">
+                  使用 :focus-within、label:has(+
+                  input:focus)、form:has(:invalid) 等选择器验证焦点与校验传播
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">表单</span>
+                  <span>nested-forms.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/08-complex-selectors-interaction/performance-load.html"
+                  class="test-title"
+                  >性能压力</a
+                >
+                <p class="test-description">
+                  大量元素 + 交互引发的选择器匹配压力，观察 Recalculate Style
+                  的耗时
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">性能</span>
+                  <span>performance-load.html</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 09. SVG图像嵌入与引用方式 -->
+          <div class="category-section" data-category="svg">
+            <div class="category-header" onclick="toggleCategory(this)">
+              <div class="category-icon">09</div>
+              <div class="category-title">
+                <h2>SVG图像嵌入与引用方式</h2>
+                <p class="category-description">
+                  内联 / 外部引用 / CSS 背景 三种方式并排比较
+                </p>
+              </div>
+              <div class="category-stats">
+                <span>4个测试</span>
+                <span>•</span>
+                <span>矢量图形</span>
+              </div>
+              <div class="expand-icon">▼</div>
+            </div>
+            <div class="test-cases">
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/09-svg-embed-modes/index.html"
+                  class="test-title"
+                  >SVG 图像嵌入与引用方式 · 对比页</a
+                >
+                <p class="test-description">
+                  内联 / 外部引用 / CSS 背景 三种方式并排比较
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">对比</span>
+                  <span>index.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/09-svg-embed-modes/inline.html"
+                  class="test-title"
+                  >内联 SVG</a
+                >
+                <p class="test-description">
+                  页面内联的 &lt;svg&gt;（可被页面 CSS / JS 完全控制）
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">内联</span>
+                  <span>inline.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/09-svg-embed-modes/external.html"
+                  class="test-title"
+                  >外部 SVG 引用</a
+                >
+                <p class="test-description">
+                  外部 SVG 文件，通过 &lt;img&gt; / &lt;object&gt; /
+                  &lt;embed&gt; 引用
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">外部引用</span>
+                  <span>external.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/09-svg-embed-modes/css-background.html"
+                  class="test-title"
+                  >CSS 背景 SVG</a
+                >
+                <p class="test-description">
+                  将 SVG 作为 CSS 背景图像（background-image）
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">CSS背景</span>
+                  <span>css-background.html</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 10. 混合模式叠加效果与合成层 -->
+          <div class="category-section" data-category="blend">
+            <div class="category-header" onclick="toggleCategory(this)">
+              <div class="category-icon">10</div>
+              <div class="category-title">
+                <h2>混合模式叠加效果与合成层</h2>
+                <p class="category-description">
+                  验证Chrome对CSS mix-blend-mode的渲染与合成层处理
+                </p>
+              </div>
+              <div class="category-stats">
+                <span>4个测试</span>
+                <span>•</span>
+                <span>视觉效果</span>
+              </div>
+              <div class="expand-icon">▼</div>
+            </div>
+            <div class="test-cases">
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/10-mix-blend-mode-compositing-layers/index.html"
+                  class="test-title"
+                  >混合模式叠加效果与合成层</a
+                >
+                <p class="test-description">
+                  验证Chrome对CSS mix-blend-mode的渲染与合成层处理
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">基础</span>
+                  <span>index.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/10-mix-blend-mode-compositing-layers/layers.html"
+                  class="test-title"
+                  >合成层观察</a
+                >
+                <p class="test-description">
+                  不同CSS提示与混合模式组合下的图层边界与合成行为
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">合成层</span>
+                  <span>layers.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/10-mix-blend-mode-compositing-layers/perf-stress.html"
+                  class="test-title"
+                  >性能压力与帧率观测</a
+                >
+                <p class="test-description">
+                  大量混合元素、持续动画的情况下，观察帧率与流畅度
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">性能</span>
+                  <span>perf-stress.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/10-mix-blend-mode-compositing-layers/text-image.html"
+                  class="test-title"
+                  >文本与图像的混合模式</a
+                >
+                <p class="test-description">
+                  在不同内容类型（文本、SVG 图像）上验证混合公式与隔离行为
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">文本图像</span>
+                  <span>text-image.html</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 11. 滤镜与背景滤镜 -->
+          <div class="category-section" data-category="filter">
+            <div class="category-header" onclick="toggleCategory(this)">
+              <div class="category-icon">11</div>
+              <div class="category-title">
+                <h2>滤镜与背景滤镜</h2>
+                <p class="category-description">
+                  测试滤镜效果的渲染性能和视觉正确性，包括背景滤镜和前景滤镜
+                </p>
+              </div>
+              <div class="category-stats">
+                <span>4个测试</span>
+                <span>•</span>
+                <span>视觉效果</span>
+              </div>
+              <div class="expand-icon">▼</div>
+            </div>
+            <div class="test-cases">
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/11-filter-backdrop/01-backdrop-scroll.html"
+                  class="test-title"
+                  >背景滤镜滚动性能</a
+                >
+                <p class="test-description">
+                  固定半透明栏应用 backdrop-filter:
+                  blur()，滚动观察背景模糊和重绘
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">性能</span>
+                  <span>01-backdrop-scroll.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/11-filter-backdrop/02-foreground-filter.html"
+                  class="test-title"
+                  >前景滤镜准确性与层合成</a
+                >
+                <p class="test-description">
+                  正文图片应用 filter: blur()，验证视觉与层优化
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">合成层</span>
+                  <span>02-foreground-filter.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/11-filter-backdrop/03-combined.html"
+                  class="test-title"
+                  >综合场景（背景滤镜 + 前景滤镜）</a
+                >
+                <p class="test-description">
+                  固定半透明栏（背景模糊） + 正文图片（前景模糊）
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">综合</span>
+                  <span>03-combined.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/11-filter-backdrop/index.html"
+                  class="test-title"
+                  >滤镜测试入口</a
+                >
+                <p class="test-description">
+                  自动重定向到 01-backdrop-scroll.html
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">重定向</span>
+                  <span>index.html</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 12. CSS遮罩效果 -->
+          <div class="category-section" data-category="mask">
+            <div class="category-header" onclick="toggleCategory(this)">
+              <div class="category-icon">12</div>
+              <div class="category-title">
+                <h2>CSS遮罩效果</h2>
+                <p class="category-description">
+                  验证 Chrome 对 CSS mask/mask-image
+                  等属性的支持，以及遮罩对元素可见区域与渲染性能的影响
+                </p>
+              </div>
+              <div class="category-stats">
+                <span>5个测试</span>
+                <span>•</span>
+                <span>遮罩裁剪</span>
+              </div>
+              <div class="expand-icon">▼</div>
+            </div>
+            <div class="test-cases">
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/12-css-mask-effects/index.html"
+                  class="test-title"
+                  >CSS 遮罩效果及性能</a
+                >
+                <p class="test-description">
+                  验证 Chrome 对 CSS mask/mask-image
+                  等属性的支持，以及遮罩对元素可见区域与渲染性能的影响
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">导航</span>
+                  <span>index.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/12-css-mask-effects/01-basic-mask.html"
+                  class="test-title"
+                  >基础：SVG/图像遮罩裁剪</a
+                >
+                <p class="test-description">
+                  用 mask-image 给元素应用
+                  SVG/图像/渐变遮罩，验证可见区域裁剪与透明的准确性
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">基础</span>
+                  <span>01-basic-mask.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/12-css-mask-effects/02-gradient-mask.html"
+                  class="test-title"
+                  >渐变遮罩与半透明边缘</a
+                >
+                <p class="test-description">
+                  使用 CSS 渐变作为遮罩，观察边缘的平滑淡出与透明过渡是否正确
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">渐变</span>
+                  <span>02-gradient-mask.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/12-css-mask-effects/03-multi-mask.html"
+                  class="test-title"
+                  >多图层遮罩与合成</a
+                >
+                <p class="test-description">
+                  尝试多张遮罩层并指定 mask-composite
+                  运算；若浏览器不支持，将退化为默认叠加
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">多层</span>
+                  <span>03-multi-mask.html</span>
+                </div>
+              </div>
+              <div class="test-card">
+                <a
+                  href="cn/layout-and-rendering/12-css-mask-effects/04-performance.html"
+                  class="test-title"
+                  >性能对比与合成层观察</a
+                >
+                <p class="test-description">
+                  对比未遮罩与遮罩元素在动画场景下的帧率；观察遮罩是否触发独立合成层
+                </p>
+                <div class="test-meta">
+                  <span class="test-type">性能</span>
+                  <span>04-performance.html</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 搜索功能
+      const searchInput = document.getElementById("searchInput");
+      const categoryGroups = document.querySelectorAll(".category-section");
+      const testCards = document.querySelectorAll(".test-card");
+
+      searchInput.addEventListener("input", function () {
+        const searchTerm = this.value.toLowerCase();
+        let visibleCount = 0;
+
+        categoryGroups.forEach(category => {
+          const categoryHeader = category.querySelector(".category-header");
+          const categoryTitle = categoryHeader
+            .querySelector("h2")
+            .textContent.toLowerCase();
+          const categoryDesc = categoryHeader
+            .querySelector(".category-description")
+            .textContent.toLowerCase();
+          const testCases = category.querySelectorAll(".test-card");
+
+          let categoryHasVisibleItems = false;
+
+          if (searchTerm === "") {
+            // 显示所有内容
+            category.style.display = "block";
+            testCases.forEach(test => {
+              test.style.display = "block";
+              visibleCount++;
+            });
+            categoryHasVisibleItems = true;
+          } else {
+            // 检查分类是否匹配
+            const categoryMatches =
+              categoryTitle.includes(searchTerm) ||
+              categoryDesc.includes(searchTerm);
+
+            testCases.forEach(test => {
+              const testTitle = test
+                .querySelector(".test-title")
+                .textContent.toLowerCase();
+              const testDesc = test
+                .querySelector(".test-description")
+                .textContent.toLowerCase();
+              const testMatches =
+                testTitle.includes(searchTerm) || testDesc.includes(searchTerm);
+
+              if (categoryMatches || testMatches) {
+                test.style.display = "block";
+                categoryHasVisibleItems = true;
+                visibleCount++;
+              } else {
+                test.style.display = "none";
+              }
+            });
+
+            category.style.display = categoryHasVisibleItems ? "block" : "none";
+          }
+        });
+
+        // 更新统计数字（可选）
+        console.log(`显示 ${visibleCount} 个测试用例`);
+      });
+
+      // 分类展开/收起功能
+      function toggleCategory(header) {
+        const section = header.parentElement;
+        const expandIcon = header.querySelector(".expand-icon");
+
+        section.classList.toggle("collapsed");
+
+        if (section.classList.contains("collapsed")) {
+          expandIcon.textContent = "▶";
+        } else {
+          expandIcon.textContent = "▼";
+        }
+      }
+
+      // 视图切换功能
+      const gridViewBtn = document.getElementById("gridViewBtn");
+      const listViewBtn = document.getElementById("listViewBtn");
+      const container = document.querySelector(".container");
+
+      gridViewBtn.addEventListener("click", function () {
+        container.classList.remove("list-view");
+        gridViewBtn.classList.add("active");
+        listViewBtn.classList.remove("active");
+      });
+
+      listViewBtn.addEventListener("click", function () {
+        container.classList.add("list-view");
+        listViewBtn.classList.add("active");
+        gridViewBtn.classList.remove("active");
+      });
+
+      // 全部展开/收起功能
+      const expandAllBtn = document.getElementById("expandAllBtn");
+      const collapseAllBtn = document.getElementById("collapseAllBtn");
+
+      expandAllBtn.addEventListener("click", function () {
+        categoryGroups.forEach(section => {
+          section.classList.remove("collapsed");
+          const expandIcon = section.querySelector(".expand-icon");
+          expandIcon.textContent = "▼";
+        });
+      });
+
+      collapseAllBtn.addEventListener("click", function () {
+        categoryGroups.forEach(section => {
+          section.classList.add("collapsed");
+          const expandIcon = section.querySelector(".expand-icon");
+          expandIcon.textContent = "▶";
+        });
+      });
+
+      // 初始状态：全部展开
+      categoryGroups.forEach(section => {
+        section.classList.remove("collapsed");
+      });
+    </script>
+  </body>
+</html>

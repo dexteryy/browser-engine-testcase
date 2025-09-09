@@ -1,0 +1,84 @@
+/* Global layout & UI shell (comments in English) */
+:root{
+  --wrap-w: min(1100px, 92vw);
+  --radius: 12px;
+  --border: 1px solid #e5e7eb;
+  --accent: #2563eb;
+  --muted: #64748b;
+  --bg: #ffffff;
+  --panel-gap: 24px;
+}
+
+*{ box-sizing: border-box; }
+html,body{ height:100%; background: var(--bg); color:#0f172a; font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Arial, "PingFang SC", "Microsoft YaHei", sans-serif; }
+h1,h2,h3{ line-height:1.25; }
+p{ line-height:1.7; }
+
+.wrap{ width: var(--wrap-w); margin: 0 auto; }
+
+.topbar{
+  border-bottom: var(--border);
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.topbar .wrap{ padding: 16px 0; }
+.topbar h1{ margin: 0 0 6px 0; font-size: 22px; }
+.subtitle{ margin: 0; color: var(--muted); }
+
+.toolbar{ border-bottom: var(--border); background:#fff; }
+.controls{ display:flex; flex-wrap: wrap; gap: 16px 24px; align-items: center; padding: 12px 0; }
+.controls .group{ display:flex; align-items:center; gap: 10px; }
+.controls label{ color: #334155; font-size:14px; white-space: nowrap; }
+.controls input[type="range"]{ width: 240px; }
+.controls output{ min-width: 40px; text-align: right; color:#0f172a; font-variant-numeric: tabular-nums; }
+
+.test-area{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--panel-gap);
+  margin: 20px 0 10px;
+}
+.panel h2{ margin: 0 0 10px 0; font-size: 16px; color:#334155; }
+
+/* The query container wrapper */
+.cq-container{
+  /* Enable size containment in inline axis */
+  container-type: inline-size;   /* this makes it a size container */
+  container-name: card;          /* give the container a name */
+  position: relative;
+  border: var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  background: #fafafa;
+  /* Allow manual horizontal resize for hands-on testing */
+  resize: horizontal;
+  overflow: auto;
+  min-width: 240px;
+}
+
+/* A little badge to show container width/threshold live */
+.size-badge{
+  position: absolute;
+  top: 8px; right: 8px;
+  background: #111827;
+  color:#fff;
+  font-size:12px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  opacity: .9;
+  pointer-events: none;
+}
+
+/* Explanation section */
+.explain{ border-top: var(--border); padding: 14px 0 40px; }
+.explain h2{ margin: 4px 0 12px; font-size: 18px; }
+.explain ol{ padding-left: 18px; }
+.explain li{ margin: 6px 0; }
+.explain code{ background:#f1f5f9; padding: 2px 6px; border-radius: 6px; }
+
+/* Media-query-only visual toggle (optional, for contrast with container queries) */
+@media (width >= 900px){
+  .mq-debug .cq-card{ border-color: #06b6d4; box-shadow: 0 0 0 1px #06b6d4 inset; }
+}

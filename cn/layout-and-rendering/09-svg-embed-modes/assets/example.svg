@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Simple external SVG used by <img>, <object>/<embed>, and CSS backgrounds.
+     It contains a black rectangle and a red circle. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="160" viewBox="0 0 260 160">
+  <title>Example SVG: black rect + red circle</title>
+  <desc>Black rectangle with a red circle. The circle has class 'dot'.</desc>
+  <defs>
+    <style>
+      .dot { fill: #ef4444; } /* red in external file */
+      .rect { fill: #111; opacity: .75; }
+    </style>
+  </defs>
+  <rect class="rect" x="30" y="60" width="200" height="60" rx="6" />
+  <circle class="dot" cx="90" cy="80" r="30" />
+  <text x="135" y="95" font-size="14" fill="#fff" font-family="system-ui, -apple-system, Arial">EXTERNAL</text>
+</svg>

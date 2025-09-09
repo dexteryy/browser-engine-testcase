@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>测试用例10：文本与图像的混合模式</title>
+  <link rel="stylesheet" href="css/shared.css"/>
+  <style>
+    /* Page-specific micro styles */
+    .panel .controls {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      background: rgba(255,255,255,.9);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px;
+      display: grid;
+      gap: 6px;
+      font-size: 12px;
+    }
+    .panel .controls label { font-size: 12px; font-weight: 600; }
+    .panel .controls select, .panel .controls input { width: 190px; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="inner">
+      <h1>测试用例10：文本与图像的混合模式</h1>
+      <p>在不同内容类型（文本、SVG 图像）上验证混合公式与隔离行为</p>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="toolbar">
+      <div>
+        <label>文本区域背景</label>
+        <select id="textBg">
+          <option value="solid" selected>纯色（蓝）</option>
+          <option value="gradient">渐变</option>
+          <option value="checker">棋盘格</option>
+        </select>
+      </div>
+      <div>
+        <label>文本混合模式</label>
+        <select id="textMode">
+          <option>normal</option>
+          <option selected>multiply</option>
+          <option>screen</option>
+          <option>overlay</option>
+          <option>difference</option>
+          <option>exclusion</option>
+          <option>lighten</option>
+          <option>darken</option>
+        </select>
+      </div>
+      <div>
+        <label>文本字号</label>
+        <input type="range" id="fontSize" min="24" max="96" step="1" value="48"/>
+      </div>
+      <div>
+        <label>组隔离（文本侧）</label>
+        <div class="inline">
+          <input type="checkbox" id="textIsolate"/>
+          <span class="hint">父容器 <span class="code-like">isolation: isolate</span></span>
+        </div>
+      </div>
+      <div>
+        <label>图片混合模式</label>
+        <select id="imgMode">
+          <option>normal</option>
+          <option selected>screen</option>
+          <option>multiply</option>
+          <option>overlay</option>
+          <option>difference</option>
+          <option>exclusion</option>
+          <option>lighten</option>
+          <option>darken</option>
+        </select>
+      </div>
+      <div>
+        <label>图片不透明度</label>
+        <input type="range" id="imgAlpha" min="0.1" max="1" step="0.01" value="0.85"/>
+      </div>
+      <div>
+        <label>组隔离（图片侧）</label>
+        <div class="inline">
+          <input type="checkbox" id="imgIsolate"/>
+          <span class="hint">父容器 <span class="code-like">isolation: isolate</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="panels">
+      <div class="panel">
+        <div class="panel-title">文本混合</div>
+        <div class="text-area" id="textArea">
+          <div class="text-sample" id="textSample">
+            <div class="white" id="whiteText" style="mix-blend-mode: multiply;">WHITE 文本</div>
+            <div class="black" id="blackText" style="mix-blend-mode: multiply;">BLACK 文本</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">图像混合（SVG）</div>
+        <div class="img-area" id="imgArea">
+          <img id="svgImg" src="assets/sample.svg" alt="示例 SVG" style="mix-blend-mode: screen; opacity: 0.85;"/>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="explain">
+      <h3>说明</h3>
+      <ul>
+        <li>左侧为白/黑文本在不同背景上的混合表现，右侧为彩色 SVG 图像与深色背景的混合表现。</li>
+        <li>切换“组隔离”可对比元素在同一叠加上下文内混合与在隔离上下文内混合的差异。</li>
+        <li>文本与图像同样遵循 CSS 混合公式，但视觉观感因内容分布、色域不同而不同。</li>
+      </ul>
+    </div>
+  </section>
+
+  <script>
+    // Elements
+    const textBg = document.getElementById('textBg');
+    const textMode = document.getElementById('textMode');
+    const fontSize = document.getElementById('fontSize');
+    const textIsolate = document.getElementById('textIsolate');
+    const imgMode = document.getElementById('imgMode');
+    const imgAlpha = document.getElementById('imgAlpha');
+    const imgIsolate = document.getElementById('imgIsolate');
+
+    const textArea = document.getElementById('textArea');
+    const whiteText = document.getElementById('whiteText');
+    const blackText = document.getElementById('blackText');
+    const imgArea = document.getElementById('imgArea');
+    const svgImg = document.getElementById('svgImg');
+    const textSample = document.getElementById('textSample');
+
+    function applyTextBg() {
+      if (textBg.value === 'solid') {
+        textArea.style.background = '#1140ff';
+      } else if (textBg.value === 'gradient') {
+        textArea.style.background = 'linear-gradient(135deg, #1140ff, #00c2ff)';
+      } else {
+        textArea.style.backgroundImage =
+          'linear-gradient(45deg, #f5f5f5 25%, transparent 25%),'+
+          'linear-gradient(-45deg, #f5f5f5 25%, transparent 25%),'+
+          'linear-gradient(45deg, transparent 75%, #f5f5f5 75%),'+
+          'linear-gradient(-45deg, transparent 75%, #f5f5f5 75%)';
+        textArea.style.backgroundSize = '20px 20px';
+        textArea.style.backgroundPosition = '0 0, 0 10px, 10px -10px, -10px 0px';
+      }
+    }
+    function applyAll() {
+      applyTextBg();
+      whiteText.style.mixBlendMode = textMode.value;
+      blackText.style.mixBlendMode = textMode.value;
+      whiteText.style.fontSize = fontSize.value + 'px';
+      blackText.style.fontSize = fontSize.value + 'px';
+      textArea.style.isolation = textIsolate.checked ? 'isolate' : 'auto';
+
+      svgImg.style.mixBlendMode = imgMode.value;
+      svgImg.style.opacity = imgAlpha.value;
+      imgArea.style.isolation = imgIsolate.checked ? 'isolate' : 'auto';
+    }
+
+    [textBg, textMode, fontSize, textIsolate, imgMode, imgAlpha, imgIsolate].forEach(el=>{
+      el.addEventListener('input', applyAll);
+      el.addEventListener('change', applyAll);
+    });
+
+    applyAll();
+  </script>
+</body>
+</html>

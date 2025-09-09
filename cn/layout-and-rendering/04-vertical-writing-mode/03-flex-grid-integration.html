@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>04-03 布局整合：垂直容器与 Flex / Grid 对齐</title>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="common.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="inner">
+      <h1>测试用例4-03：布局整合</h1>
+      <div class="sub">垂直书写容器与 Flex/Grid 的尺寸计算与对齐关系</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="toolbar">
+      <div class="group">
+        <h3>Flex 控制</h3>
+        <div class="row">
+          <label for="ctrl-flex-ai">align-items：</label>
+          <select id="ctrl-flex-ai">
+            <option>stretch</option>
+            <option>flex-start</option>
+            <option>center</option>
+            <option>flex-end</option>
+            <option>baseline</option>
+          </select>
+          <label for="ctrl-flex-jc">justify-content：</label>
+          <select id="ctrl-flex-jc">
+            <option>flex-start</option>
+            <option>center</option>
+            <option>flex-end</option>
+            <option>space-between</option>
+            <option>space-around</option>
+            <option>space-evenly</option>
+          </select>
+        </div>
+        <div class="row">
+          <label for="ctrl-flex-gap">gap（px）：</label>
+          <input type="range" id="ctrl-flex-gap" min="0" max="40" step="1" value="12" />
+          <label><input type="checkbox" id="ctrl-flex-wrap" /> flex-wrap: wrap</label>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>Grid 控制</h3>
+        <div class="row">
+          <label for="ctrl-grid-ai">align-items：</label>
+          <select id="ctrl-grid-ai">
+            <option>stretch</option>
+            <option>start</option>
+            <option>center</option>
+            <option>end</option>
+          </select>
+          <label for="ctrl-grid-ji">justify-items：</label>
+          <select id="ctrl-grid-ji">
+            <option>stretch</option>
+            <option>start</option>
+            <option>center</option>
+            <option>end</option>
+          </select>
+        </div>
+        <div class="row">
+          <label for="ctrl-grid-gap">gap（px）：</label>
+          <input type="range" id="ctrl-grid-gap" min="0" max="40" step="1" value="12" />
+          <label for="ctrl-grid-flow">grid-auto-flow：</label>
+          <select id="ctrl-grid-flow">
+            <option>row</option>
+            <option>column</option>
+            <option>dense</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>公共参数</h3>
+        <div class="row">
+          <label><input type="checkbox" id="ctrl-baseline" /> 显示基线栅格</label>
+          <label><input type="checkbox" id="ctrl-outline" /> 显示调试轮廓</label>
+        </div>
+        <div class="row">
+          <label for="ctrl-fs">字体大小（px）：</label>
+          <input type="range" id="ctrl-fs" min="14" max="28" step="1" value="18" />
+          <label for="ctrl-lh">行高（px）：</label>
+          <input type="range" id="ctrl-lh" min="18" max="40" step="1" value="28" />
+        </div>
+      </div>
+
+      <div class="group" style="grid-column: span 4;">
+        <h3>状态</h3>
+        <div class="meters" id="meters"></div>
+      </div>
+    </section>
+
+    <section class="test-area" id="test-area">
+      <div class="overlay-baseline"></div>
+
+      <div class="lab">
+        <div class="slot">
+          <h4>Flex：混合书写模式子项</h4>
+          <div id="flex" class="flex-lab">
+            <div class="flex-item">
+              <div id="vb" class="vertical-box vertical-rl tor-mixed sample">
+                <p>垂直子项 A（vertical-rl）。混排 <span class="latin">Flex</span> 与数字 <span class="num">12</span><span class="num">34</span>。</p>
+                <p>多段落以观察主轴/交叉轴对齐。</p>
+              </div>
+            </div>
+            <div class="flex-item" style="width:220px;">
+              <div class="hz-box sample">
+                <p>水平子项 B（horizontal-tb）。用于与竖排项对齐对比。</p>
+                <ul><li>flex 对齐：AI/JC</li><li>gap/换行</li></ul>
+              </div>
+            </div>
+            <div class="flex-item">
+              <div class="vertical-box vertical-lr tor-mixed sample" style="--inline-size:16em; --block-size:22em;">
+                <p>垂直子项 C（vertical-lr）。列从左向右推进。</p>
+                <p>观察尺寸计算与对齐。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="slot">
+          <h4>Grid：混合书写模式单元格</h4>
+          <div id="grid" class="grid-lab">
+            <div class="panel">
+              <div class="vertical-box vertical-rl tor-mixed sample">
+                <p>网格单元 1（vertical-rl）。</p>
+                <p>长文以触发换行与滚动。</p>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="hz-box sample">
+                <p>网格单元 2（horizontal-tb）。</p>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="vertical-box vertical-lr tor-mixed sample">
+                <p>网格单元 3（vertical-lr）。</p>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="vertical-box vertical-rl tor-upright sample" style="--inline-size:14em;">
+                <p>网格单元 4（upright）。<span class="latin">Grid</span> 对齐。</p>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="vertical-box vertical-rl tor-sideways sample" style="--block-size:20em;">
+                <p>网格单元 5（sideways）。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="explain">
+      <h3>测试目标</h3>
+      <p>验证垂直书写模式的盒尺寸（inline/block）在 Flex 与 Grid 中的解释是否正确，及其与水平子项的基线、对齐与间距行为。</p>
+      <h4>使用方法</h4>
+      <ul>
+        <li>调整 Flex 的 <code>align-items</code>、<code>justify-content</code>、<code>gap</code> 与 <code>flex-wrap</code>，观察各子项的对齐。</li>
+        <li>调整 Grid 的 <code>align-items</code>、<code>justify-items</code>、<code>gap</code> 与 <code>grid-auto-flow</code>，查看自动布局与对齐。</li>
+        <li>在顶部“公共参数”中改变字体与行高，并可开启“基线栅格”“调试轮廓”。</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    // Page-specific wiring for layout controls
+    const $ = (sel, root=document) => root.querySelector(sel);
+
+    window.addEventListener('DOMContentLoaded', function(){
+      const vb = document.getElementById('vb');
+      Test04.wireCommonControls({
+        target: vb,
+        meters: document.getElementById('meters')
+      });
+
+      const flex = document.getElementById('flex');
+      const grid = document.getElementById('grid');
+
+      const ai = document.getElementById('ctrl-flex-ai');
+      const jc = document.getElementById('ctrl-flex-jc');
+      const fgap = document.getElementById('ctrl-flex-gap');
+      const fwrap = document.getElementById('ctrl-flex-wrap');
+
+      const gai = document.getElementById('ctrl-grid-ai');
+      const gji = document.getElementById('ctrl-grid-ji');
+      const ggap = document.getElementById('ctrl-grid-gap');
+      const gflow = document.getElementById('ctrl-grid-flow');
+
+      function applyFlex(){
+        flex.style.alignItems = ai.value;
+        flex.style.justifyContent = jc.value;
+        flex.style.gap = fgap.value + 'px';
+        flex.style.flexWrap = fwrap.checked ? 'wrap' : 'nowrap';
+      }
+      function applyGrid(){
+        grid.style.alignItems = gai.value;
+        grid.style.justifyItems = gji.value;
+        grid.style.gap = ggap.value + 'px';
+        grid.style.gridAutoFlow = gflow.value;
+      }
+
+      [ai,jc,fgap,fwrap].forEach(el => el.addEventListener('input', applyFlex));
+      [gai,gji,ggap,gflow].forEach(el => el.addEventListener('input', applyGrid));
+      applyFlex(); applyGrid();
+    });
+  </script>
+</body>
+</html>

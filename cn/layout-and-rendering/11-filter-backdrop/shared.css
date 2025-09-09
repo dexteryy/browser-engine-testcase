@@ -1,0 +1,108 @@
+
+/* Shared base styles for Test Case 11 - comments are in English by requirement */
+:root{
+  --maxw: 1080px;
+  --header-h: 76px;
+  --gap: 12px;
+  --radius: 10px;
+  --border: 1px solid #e9e9ef;
+  --shade: 0 6px 24px rgba(0,0,0,.06);
+  --text: #111827;
+  --muted: #6b7280;
+  --accent: #0d6efd;
+  --accent-weak: #e7f1ff;
+  /* Blur control variables */
+  --backdrop-blur: 5px;
+  --backdrop-alpha: .6;
+  --img-blur: 5px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#fff;color:var(--text);font:14px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "PingFang SC","Microsoft Yahei","Noto Sans CJK SC",sans-serif}
+code,kbd{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace}
+a{color:#0a58ca;text-decoration:none}
+a:hover{text-decoration:underline}
+
+.container{width:100%;max-width:var(--maxw);margin-inline:auto;padding-inline:20px}
+
+.masthead{
+  position:fixed;inset:0 0 auto 0;height:var(--header-h);z-index:1000;
+  background:#fff; /* solid by default */
+  display:flex;align-items:center;border-bottom:var(--border);
+  box-shadow: 0 2px 12px rgba(0,0,0,.04);
+}
+.masthead--glass{
+  /* This variant is the test target for backdrop-filter */
+  background: rgba(255,255,255,var(--backdrop-alpha));
+  -webkit-backdrop-filter: blur(var(--backdrop-blur));
+  backdrop-filter: blur(var(--backdrop-blur));
+}
+.masthead .title{
+  display:flex;gap:10px;align-items:baseline;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.masthead .title h1{font-size:16px;margin:0;font-weight:700}
+.masthead .title .sub{font-size:13px;color:var(--muted)}
+main{padding-top:calc(var(--header-h) + 16px)}
+
+.toolbar{
+  margin-block:16px; background:#fff; border:var(--border); border-radius:var(--radius);
+  box-shadow:var(--shade);
+}
+.toolbar .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:12px 14px; border-bottom:var(--border)}
+.toolbar .row:last-child{border-bottom:none}
+.toolbar label{font-size:13px;color:#374151}
+.toolbar .group{display:flex; align-items:center; gap:8px; padding:6px 8px; background:#fff; border:var(--border); border-radius:8px}
+.toolbar input[type="range"]{width:180px}
+.toolbar .num{padding:2px 6px;border-radius:6px;background:var(--accent-weak);color:#0b5ed7;font-weight:600}
+
+.test-area{margin-block:12px; background:#fff; border:var(--border); border-radius:var(--radius); box-shadow:var(--shade); overflow:hidden}
+.test-area .section{padding:20px}
+.test-area .scroller{padding:0 20px 24px 20px}
+.test-area h2{font-size:16px;margin:0 0 8px 0}
+.test-area p{margin:8px 0;color:#111827}
+.test-area .meta{color:var(--muted);font-size:12px}
+
+.long-list{counter-reset:item}
+.long-list p::before{counter-increment:item; content: counter(item) ". "; color:#9ca3af}
+
+.photo-wrap{display:flex;justify-content:center;align-items:center;padding:16px 0}
+.photo{
+  width: min(900px, 100%);
+  height: auto;
+  display:block;
+  border-radius:12px;
+  border:var(--border);
+  box-shadow: 0 12px 40px rgba(0,0,0,.10);
+  filter: blur(var(--img-blur));
+  transform: translateZ(0); /* better texture sampling */
+}
+.photo[data-enabled="false"]{filter:none}
+
+.flags{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.flag{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;background:#f3f4f6;border:1px solid #e5e7eb;font-size:12px;color:#374151}
+
+.explain{margin:20px 0 60px;border:var(--border);border-radius:var(--radius);background:#fff;box-shadow:var(--shade)}
+.explain .section{padding:20px;border-bottom:var(--border)}
+.explain .section:last-child{border-bottom:none}
+.explain h3{margin:0 0 8px 0;font-size:15px}
+.explain ul{margin:6px 0 0 18px;padding:0}
+.explain li{margin:6px 0}
+
+.footer-nav{margin:32px 0 80px; display:flex; gap:10px; flex-wrap:wrap}
+.footer-nav a{padding:10px 12px;border:var(--border);border-radius:8px;background:#fff;box-shadow:var(--shade)}
+
+/* Perf HUD */
+.perf-hud{
+  position:fixed; right:12px; bottom:12px; z-index:1001;
+  min-width:240px; padding:10px 12px; border-radius:10px; border:1px solid #e5e7eb; background:#111827; color:#e5e7eb;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size:12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.25);
+}
+.perf-hud .row{display:flex;align-items:center;justify-content:space-between;margin:2px 0}
+.perf-hud .bar{height:6px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+.perf-hud .bar > i{display:block;height:100%;width:0%;background:#60a5fa}
+.perf-hud .muted{color:#9ca3af}
+.hidden{display:none !important}
+
+/* Utility labels */
+.badge{display:inline-block;padding:2px 6px;border-radius:6px;background:#e7f1ff;color:#0b5ed7;font-weight:600;font-size:12px}
+.note{font-size:12px;color:var(--muted)}

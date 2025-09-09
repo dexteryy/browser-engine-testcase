@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>测试用例1：Flexbox弹性布局与动态重排 — 基础与悬停扩展</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Page-local styles (English comments only) */
+  </style>
+</head>
+<body class="page">
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="inner">
+      <div>
+        <div class="title">测试用例1：Flexbox弹性布局与动态重排 · 基础与悬停扩展</div>
+        <div class="subtitle">验证主轴/侧轴对齐、间距与子项悬停扩展时的重排正确性</div>
+      </div>
+      <div><span class="badge">CSS 纯交互 · 无 JS</span></div>
+    </div>
+  </header>
+
+  <!-- Toolbar (CSS only, using :has to affect the demo) -->
+  <form class="toolbar" aria-label="工具栏：调整 Flex 参数（仅影响测试区域）">
+    <fieldset class="control-group">
+      <legend>主轴对齐</legend>
+      <input type="radio" name="jc" id="jc-start" checked>
+      <label for="jc-start">flex-start</label>
+      <input type="radio" name="jc" id="jc-center">
+      <label for="jc-center">center</label>
+      <input type="radio" name="jc" id="jc-between">
+      <label for="jc-between">space-between</label>
+    </fieldset>
+
+    <fieldset class="control-group">
+      <legend>侧轴对齐</legend>
+      <input type="radio" name="ai" id="ai-stretch" checked>
+      <label for="ai-stretch">stretch</label>
+      <input type="radio" name="ai" id="ai-center">
+      <label for="ai-center">center</label>
+      <input type="radio" name="ai" id="ai-start">
+      <label for="ai-start">flex-start</label>
+    </fieldset>
+
+    <fieldset class="control-group">
+      <legend>方向</legend>
+      <input type="radio" name="dir" id="dir-row" checked>
+      <label for="dir-row">row</label>
+      <input type="radio" name="dir" id="dir-col">
+      <label for="dir-col">column</label>
+    </fieldset>
+
+    <fieldset class="control-group">
+      <legend>间距</legend>
+      <input type="radio" name="gap" id="gap-8">
+      <label for="gap-8">8px</label>
+      <input type="radio" name="gap" id="gap-16" checked>
+      <label for="gap-16">16px</label>
+      <input type="radio" name="gap" id="gap-24">
+      <label for="gap-24">24px</label>
+    </fieldset>
+
+    <fieldset class="control-group">
+      <legend>过渡时间</legend>
+      <input type="radio" name="dur" id="dur-015">
+      <label for="dur-015">0.15s</label>
+      <input type="radio" name="dur" id="dur-03" checked>
+      <label for="dur-03">0.3s</label>
+      <input type="radio" name="dur" id="dur-06">
+      <label for="dur-06">0.6s</label>
+    </fieldset>
+  </form>
+
+  <!-- Test area -->
+  <section class="test-area section">
+    <h2>测试区域</h2>
+    <div class="flexroot row-fixed-height" aria-label="主容器（display:flex）">
+      <article class="item hover-grow" aria-label="子项1（悬停可扩展）">
+        <h3>子项1（文本 + 图片）</h3>
+        <img class="thumb" alt="占位图像" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Crect width='100%25' height='100%25' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='36' fill='%236b7280'%3ESVG%E5%9B%BE%E5%83%8F%3C/text%3E%3C/svg%3E">
+        <p>该子项默认 <code>flex: 1 1 0</code>，<strong>悬停时</strong>切换为更大的 <code>flex-grow</code>，观察兄弟项是否被压缩且不重叠。</p>
+      </article>
+
+      <article class="item" aria-label="子项2（包含嵌套Flex容器）">
+        <h3>子项2（嵌套容器）</h3>
+        <p>此子项内部再定义为 <code>display:flex</code>，用于测试多层布局在尺寸变化时的重排。</p>
+        <div class="nested" role="group" aria-label="嵌套容器（横向）">
+          <div class="n-item" title="悬停试试">A（悬停扩展）</div>
+          <div class="n-item" title="悬停试试">B（悬停扩展）</div>
+          <div class="n-item" title="悬停试试">C（悬停扩展）</div>
+        </div>
+      </article>
+
+      <article class="item hover-grow" aria-label="子项3（长文本）">
+        <h3>子项3（长文本）</h3>
+        <p>为了模拟复杂内容，这里放入较长的段落：Flexbox 可以在主轴方向上分配剩余空间，并在侧轴上进行对齐。当某一子项增大时，其他子项会根据 <code>flex-shrink</code> 与 <code>min-width</code> 等约束进行压缩。请留意压缩过程中是否出现文字换行异常或被遮挡。</p>
+      </article>
+
+      <article class="item" aria-label="子项4（固定最小尺寸）">
+        <h3>子项4（固定最小尺寸）</h3>
+        <p>该子项带有 <code>min-width: 120px</code> 与 <code>min-height: 120px</code> 的约束，用于验证在兄弟项扩展时，最小尺寸是否得到遵守。</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- Explanation -->
+  <section class="explain">
+    <h3>解释说明</h3>
+    <p><strong>测试目标：</strong>验证 Chrome 对 Flexbox 的主轴/侧轴对齐、多层嵌套与子项悬停扩展时的重排是否正确，确保无内容溢出或遮挡。</p>
+    <p><strong>测试方案：</strong>主容器为 <code>display:flex</code>，各子项初始 <code>flex: 1 1 0</code>。子项1与3在 <code>:hover</code> 时提高 <code>flex-grow</code>，子项2内部包含一个嵌套的 Flex 容器，其内子项在悬停时同样会扩展。</p>
+    <p><strong>使用方法：</strong>通过上方工具栏切换 <em>主轴/侧轴对齐</em>、<em>方向</em>、<em>间距</em> 与 <em>过渡时间</em>，然后将鼠标依次悬停到标记为“悬停扩展”的子项上，观察其它元素的自适应压缩与重新排布。</p>
+    <p><strong>查看/检验/评估结果：</strong>在 Chrome 打开 <em>Rendering</em> 面板勾选 “Show layout shift regions（布局偏移高亮）”，悬停触发后应仅在相关容器内出现紫色高亮区域；在 <em>Performance</em> 面板记录一次悬停操作，重排（Recalculate Style / Layout）开销应局部且随过渡时长与内容复杂度而变化，页面不可出现闪烁或断裂。</p>
+  </section>
+</body>
+</html>

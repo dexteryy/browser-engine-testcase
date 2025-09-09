@@ -1,0 +1,108 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>书写方向与列顺序测试</title>
+<link rel="stylesheet" href="style.css" />
+<script defer src="utils.js"></script>
+</head>
+<body>
+  <header id="topbar">
+    <h1>书写方向与列顺序测试</h1>
+    <p>关注：<code>writing-mode</code> 与 <code>direction</code> 变化下的列进展方向与内容顺序。</p>
+  </header>
+
+  <section id="toolbar" class="container">
+    <div class="toolbar">
+      <div class="control" style="grid-column: span 3;">
+        <label>列数（column-count）：<output id="countOut"></output></label>
+        <input id="count" type="range" min="2" max="8" value="3" />
+      </div>
+      <div class="control" style="grid-column: span 3;">
+        <label>列间距（column-gap）：<output id="gapOut"></output></label>
+        <input id="gap" type="range" min="0" max="48" value="24" />
+      </div>
+      <div class="control" style="grid-column: span 3;">
+        <label>writing-mode</label>
+        <select id="wm">
+          <option value="horizontal-tb" selected>horizontal-tb（默认）</option>
+          <option value="vertical-rl">vertical-rl（上到下，列从右到左）</option>
+          <option value="vertical-lr">vertical-lr（上到下，列从左到右）</option>
+        </select>
+      </div>
+      <div class="control" style="grid-column: span 3;">
+        <label>direction</label>
+        <select id="dir">
+          <option value="ltr" selected>ltr</option>
+          <option value="rtl">rtl</option>
+        </select>
+      </div>
+      <div class="control" style="grid-column: span 12;">
+        <div id="metrics" class="meta"></div>
+      </div>
+    </div>
+  </section>
+
+  <main id="test-area" class="container">
+    <div id="mcWrap" class="test-card" style="height: 560px; overflow: auto;">
+      <div id="mc" class="columns" style="column-count:3; column-gap:24px;">
+        <!-- Blocks injected -->
+      </div>
+    </div>
+  </main>
+
+  <section id="explain" class="container">
+    <h2>测试说明</h2>
+    <ul>
+      <li>内容由带编号的彩色区块组成（每个区块避免跨列拆分），便于观察列与内容进展方向。</li>
+      <li>切换不同的书写模式与方向，确认列的顺序是否与规范一致（例如 vertical-rl 时列应从右到左）。</li>
+    </ul>
+  </section>
+
+  <script>
+    window.addEventListener("DOMContentLoaded", () => {
+      const mc = $("#mc");
+      const wrap = $("#mcWrap");
+      const count = $("#count"); const countOut = $("#countOut");
+      const gap = $("#gap"); const gapOut = $("#gapOut");
+      const wm = $("#wm");
+      const dir = $("#dir");
+      const metrics = $("#metrics");
+
+      bindRangeOutput(count, countOut, v => v + " 列");
+      bindRangeOutput(gap, gapOut);
+
+      function buildBlocks() {
+        mc.innerHTML = "";
+        for (let i = 1; i <= 48; i++) {
+          const b = document.createElement("div");
+          b.className = "grid-block";
+          b.style.minHeight = (60 + Math.floor(Math.random() * 80)) + "px";
+          b.innerHTML = `<strong>块 ${String(i).padStart(2,"0")}</strong>：用于观察内容处于哪一列，以及列的进展方向。`;
+          mc.appendChild(b);
+        }
+      }
+
+      function apply() {
+        mc.style.columnCount = count.value;
+        mc.style.columnGap = gap.value + "px";
+        mc.style.writingMode = wm.value;
+        mc.style.direction = dir.value;
+        renderMetrics(mc, metrics);
+        // Add explicit badges for current writing-mode & direction
+        const extra = document.createElement("span");
+        extra.className = "badge";
+        extra.textContent = `writing-mode：${wm.value} / direction：${dir.value}`;
+        metrics.appendChild(extra);
+      }
+
+      buildBlocks();
+      apply();
+      [count, gap, wm, dir].forEach(i => i.addEventListener("input", apply));
+      window.addEventListener("resize", apply);
+    });
+  </script>
+</body>
+</html>

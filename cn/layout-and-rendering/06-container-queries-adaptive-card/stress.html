@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>测试用例 6（性能）：大量组件的容器查询切换</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="component-card.css">
+  <link rel="stylesheet" href="stress.css">
+</head>
+<body data-page="stress">
+  <header class="topbar">
+    <div class="wrap">
+      <h1>测试用例 6（性能）：大量组件的容器查询切换</h1>
+      <p class="subtitle">快速变更容器宽度，观察样式重计算是否局部、是否平滑。</p>
+    </div>
+  </header>
+
+  <section class="toolbar">
+    <div class="wrap">
+      <form class="controls" onsubmit="return false;">
+        <div class="group">
+          <label for="spread">宽度分布</label>
+          <input id="spread" type="range" min="0.3" max="1.4" step="0.01" value="1.0" />
+          <output id="spreadOut" for="spread">1.00</output>
+        </div>
+        <div class="group">
+          <label for="speed">自动震荡速度</label>
+          <input id="speed" type="range" min="0.2" max="3.0" step="0.1" value="1.2" />
+          <output id="speedOut" for="speed">1.2</output>
+        </div>
+        <div class="group">
+          <label><input id="auto" type="checkbox"> 开启自动震荡</label>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <section class="test-area stress">
+      <div id="grid" class="grid"></div>
+    </section>
+
+    <section class="explain">
+      <h2>解释说明</h2>
+      <ol>
+        <li><strong>测试目标：</strong>在大量组件（上百个）同时存在时，快速改变容器宽度，观察容器查询触发时的性能表现。</li>
+        <li><strong>测试方案：</strong>滑动“宽度分布”改变所有容器的宽度，或勾选“自动震荡”让宽度随时间在区间内往复变化；使用 Performance 录制观察样式重计算。</li>
+        <li><strong>结果评估：</strong>应当看到样式计算主要局限在受影响的容器内，帧率稳定，滚动/交互无明显卡顿。</li>
+      </ol>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN" id="inline">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>测试用例9：内联 SVG</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="inner">
+      <h1>测试用例9：SVG 图像嵌入与引用方式</h1>
+      <div class="desc">页面内联的 &lt;svg&gt;（可被页面 CSS / JS 完全控制）</div>
+      <nav class="nav">
+        <a href="./index.html">对比</a>
+        <a class="active" href="./inline.html">内联SVG</a>
+        <a href="./external.html">外部引用</a>
+        <a href="./css-background.html">CSS 背景</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="toolbar">
+      <div class="tool-group" style="grid-column: span 6;">
+        <h3>样式控制（作用于内联 SVG 元素）</h3>
+        <div class="tool-inline">
+          <label>圆填充：</label><input type="color" id="fill" value="#22c55e">
+          <label>描边色：</label><input type="color" id="stroke" value="#111111">
+          <label>描边宽：</label><input type="range" id="strokeW" min="0" max="8" value="1"><span id="strokeWVal" class="note">1</span>
+        </div>
+      </div>
+      <div class="tool-group" style="grid-column: span 6;">
+        <h3>尺寸与视窗</h3>
+        <div class="tool-inline">
+          <label>显示宽度(px)：</label><input type="range" id="w" min="140" max="440" value="260"><span id="wVal" class="note">260</span>
+          <label><input type="checkbox" id="preserve"> 保持长宽比</label>
+          <button id="reset">重置</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="test-area panel">
+      <svg id="svg" width="260" height="160" viewBox="0 0 260 160" aria-label="内联 SVG 示例">
+        <!-- Elements below are part of the page DOM; can be selected by CSS or JS -->
+        <rect class="rect" x="30" y="60" width="200" height="60" rx="6"></rect>
+        <circle class="dot" cx="90" cy="80" r="30" stroke="#111" stroke-width="1"></circle>
+        <text x="135" y="95" font-size="14" fill="#fff" font-family="system-ui, -apple-system, Arial">INLINE</text>
+      </svg>
+      <div>
+        <div class="code">&lt;svg&gt; 内联到 HTML，可使用选择器直接选中 <strong>.dot</strong> 并修改样式</div>
+        <p class="note">预期：使用上方控件时，圆形颜色/描边即时更新；调整尺寸无模糊。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section explain">
+    <h2>解释说明</h2>
+    <p><strong>测试目标：</strong>验证内联方式下 SVG 作为 DOM 一部分时的样式可控性与清晰度。</p>
+    <p><strong>使用方法：</strong>修改颜色、描边与宽度；修改显示尺寸。勾选“保持长宽比”时通过 <code class="code">preserveAspectRatio</code> 控制视窗缩放。</p>
+    <p><strong>结果评估：</strong>DevTools 可直接展开 <code class="code">&lt;circle.dot&gt;</code> 等节点；CSS 选择器对其生效。</p>
+  </section>
+
+  <footer class="footer">© 测试用例 9 · 内联方式</footer>
+
+  <script>
+    // Simple wiring (English comments)
+    const $ = (s, el=document)=>el.querySelector(s);
+    const svg = $("#svg");
+    const dot = $(".dot", svg);
+    const rect = $(".rect", svg);
+    const fill = $("#fill");
+    const stroke = $("#stroke");
+    const strokeW = $("#strokeW");
+    const strokeWVal = $("#strokeWVal");
+    const w = $("#w");
+    const wVal = $("#wVal");
+    const preserve = $("#preserve");
+    const reset = $("#reset");
+
+    function apply(){
+      dot.style.fill = fill.value;
+      dot.style.stroke = stroke.value;
+      dot.style.strokeWidth = strokeW.value;
+      strokeWVal.textContent = strokeW.value;
+      svg.setAttribute("width", w.value);
+      if(preserve.checked){
+        svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+      }else{
+        svg.setAttribute("preserveAspectRatio", "none");
+      }
+      wVal.textContent = w.value;
+    }
+    [fill, stroke, strokeW, w, preserve].forEach(el=>el.addEventListener("input", apply));
+    reset.addEventListener("click", ()=>{
+      fill.value = "#22c55e"; stroke.value = "#111111"; strokeW.value = 1; w.value = 260; preserve.checked = false; apply();
+    });
+    apply();
+  </script>
+</body>
+</html>

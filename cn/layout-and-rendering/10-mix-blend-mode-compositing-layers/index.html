@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>测试用例10：混合模式叠加效果与合成层</title>
+  <link rel="stylesheet" href="css/shared.css"/>
+  <style>
+    /* Page-specific micro styles (comments in English) */
+    .swatch { width: 100%; height: 36px; border-radius: 6px; border: 1px solid var(--border); }
+    .control { }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="inner">
+      <h1>测试用例10：混合模式叠加效果与合成层</h1>
+      <p>验证 Chrome 对 CSS <span class="code-like">mix-blend-mode</span> 的渲染与合成层处理</p>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="toolbar" id="toolbar">
+      <div class="control">
+        <label>混合模式（mix-blend-mode）</label>
+        <select id="mode">
+          <option>normal</option>
+          <option selected>multiply</option>
+          <option>screen</option>
+          <option>overlay</option>
+          <option>darken</option>
+          <option>lighten</option>
+          <option>color-dodge</option>
+          <option>color-burn</option>
+          <option>hard-light</option>
+          <option>soft-light</option>
+          <option>difference</option>
+          <option>exclusion</option>
+          <option>hue</option>
+          <option>saturation</option>
+          <option>color</option>
+          <option>luminosity</option>
+        </select>
+      </div>
+
+      <div class="control">
+        <label>覆盖层颜色</label>
+        <div class="inline">
+          <input type="color" id="fgColor" value="#ff0000" title="覆盖层 RGB 颜色"/>
+          <input type="range" id="fgAlpha" min="0" max="1" step="0.01" value="0.5" title="Alpha"/>
+        </div>
+        <div class="hint">不透明度：<span id="alphaLabel">0.50</span></div>
+      </div>
+
+      <div class="control">
+        <label>背景色（蓝色区域）</label>
+        <input type="color" id="bgColor" value="#0000ff"/>
+      </div>
+
+      <div class="control">
+        <label>显示白色文字</label>
+        <div class="inline">
+          <input type="checkbox" id="showText" checked/>
+          <span class="hint">观察文字与背景的混合</span>
+        </div>
+      </div>
+
+      <div class="control">
+        <label>隔离（isolation）</label>
+        <div class="inline">
+          <input type="checkbox" id="isolate"/>
+          <span class="hint">对测试区域启用 <span class="code-like">isolation: isolate</span></span>
+        </div>
+      </div>
+
+      <div class="control">
+        <label>层提升提示</label>
+        <select id="layerHint">
+          <option value="none" selected>无</option>
+          <option value="will">will-change: transform</option>
+          <option value="z">transform: translateZ(0)</option>
+        </select>
+      </div>
+
+      <div class="control">
+        <label>盒子大小（宽×高）</label>
+        <div class="inline">
+          <input type="number" id="boxW" value="320" min="60" max="1000" step="10"/>
+          <input type="number" id="boxH" value="200" min="60" max="1000" step="10"/>
+        </div>
+      </div>
+
+      <div class="control">
+        <label>位置（left, top）</label>
+        <div class="inline">
+          <input type="number" id="boxL" value="30" min="-200" max="1000" step="1"/>
+          <input type="number" id="boxT" value="20" min="-200" max="1000" step="1"/>
+        </div>
+        <div class="hint">单位：百分比 %（相对于测试区域）</div>
+      </div>
+
+      <div class="control">
+        <label>预期混合色（近似）</label>
+        <div class="swatch" id="swatch" title="根据所选模式与颜色计算，仅近似值"></div>
+        <div class="hint">仅实现 multiply / screen 公式（sRGB，简单 Alpha）。</div>
+      </div>
+
+      <div class="control">
+        <label>操作</label>
+        <div class="inline">
+          <button id="reset">重置</button>
+          <button id="random">随机参数</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <div class="bg" id="bg"></div>
+        <div class="blend-box" id="box" style="mix-blend-mode: multiply;">
+          <div class="inner-text" id="boxText">覆盖层（<span id="modeLabel">multiply</span>）</div>
+        </div>
+      </div>
+      <p class="small-note">提示：拖动红色覆盖层跨越蓝色区域边界，可观察重叠（混合）与未重叠（半透明叠加）部分的差异。</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="explain">
+      <h3>说明</h3>
+      <ol>
+        <li><strong>测试目标：</strong>验证不同 <span class="code-like">mix-blend-mode</span> 在 Chrome（基于 Chromium）中的视觉结果是否符合预期；观察混合元素是否触发合成层创建，从而保证滚动、动画期间的性能。</li>
+        <li><strong>使用方法：</strong>通过上方工具栏选择混合模式、颜色与不透明度，拖动覆盖层位置与大小。可勾选“隔离”测试 <span class="code-like">isolation: isolate</span> 对混合边界的影响。</li>
+        <li><strong>结果检验：</strong>重叠区域应显示与蓝色背景的混合色（如 <em>multiply</em> 倾向变暗、<em>screen</em> 倾向变亮）；未重叠区域应在页面白底上显示半透明叠加；边缘应平滑无闪烁。</li>
+        <li><strong>合成层观察：</strong>打开 DevTools → Rendering → 勾选 <em>Layer borders</em>。一般情况下，使用非 <span class="code-like">normal</span> 的混合模式的元素会成为单独绘制/合成的候选。此页提供 <span class="code-like">will-change</span> / 3D transform 选项以便更容易观察层边界。</li>
+        <li><strong>性能建议：</strong>单个混合元素通常由 GPU 在合成阶段计算，对帧率影响有限。若需要压力测试，请使用本测试包中的 “性能压力” 页面。</li>
+      </ol>
+    </div>
+  </section>
+
+  <script>
+    // Utility functions (comments in English as required)
+    const $ = (sel) => document.querySelector(sel);
+    const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+
+    function hexToRgb(hex) {
+      const s = hex.replace('#','');
+      const bigint = parseInt(s, 16);
+      const r = (bigint >> 16) & 255;
+      const g = (bigint >> 8) & 255;
+      const b = bigint & 255;
+      return [r,g,b];
+    }
+    function rgbToHex([r,g,b]) {
+      return '#' + [r,g,b].map(x => x.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Basic sRGB multiply/screen with simple source-over alpha
+    function channelMultiply(cb, cf, a) {
+      const b = cb/255, f = cf/255;
+      const blended = f * b;
+      const out = (1 - a) * b + a * blended;
+      return Math.round(out * 255);
+    }
+    function channelScreen(cb, cf, a) {
+      const b = cb/255, f = cf/255;
+      const blended = 1 - (1 - f) * (1 - b);
+      const out = (1 - a) * b + a * blended;
+      return Math.round(out * 255);
+    }
+    function computeSwatch(mode, fgHex, alpha, bgHex) {
+      const fg = hexToRgb(fgHex);
+      const bg = hexToRgb(bgHex);
+      let out = [0,0,0];
+      if (mode === 'multiply') {
+        out = [channelMultiply(bg[0], fg[0], alpha), channelMultiply(bg[1], fg[1], alpha), channelMultiply(bg[2], fg[2], alpha)];
+      } else if (mode === 'screen') {
+        out = [channelScreen(bg[0], fg[0], alpha), channelScreen(bg[1], fg[1], alpha), channelScreen(bg[2], fg[2], alpha)];
+      } else {
+        out = null; // not implemented
+      }
+      return out ? rgbToHex(out) : null;
+    }
+
+    // Elements
+    const mode = $('#mode');
+    const fgColor = $('#fgColor');
+    const fgAlpha = $('#fgAlpha');
+    const bgColor = $('#bgColor');
+    const showText = $('#showText');
+    const isolate = $('#isolate');
+    const layerHint = $('#layerHint');
+    const box = $('#box');
+    const bg = $('#bg');
+    const boxText = $('#boxText');
+    const modeLabel = $('#modeLabel');
+    const alphaLabel = $('#alphaLabel');
+    const swatch = $('#swatch');
+    const boxW = $('#boxW');
+    const boxH = $('#boxH');
+    const boxL = $('#boxL');
+    const boxT = $('#boxT');
+    const resetBtn = $('#reset');
+    const randomBtn = $('#random');
+    const stage = $('#stage');
+
+    function apply() {
+      // Update blend mode
+      box.style.mixBlendMode = mode.value;
+      modeLabel.textContent = mode.value;
+
+      // Colors
+      const a = +fgAlpha.value;
+      const [r,g,b_] = hexToRgb(fgColor.value);
+      box.style.background = `rgba(${r}, ${g}, ${b_}, ${a})`;
+      alphaLabel.textContent = a.toFixed(2);
+      bg.style.background = bgColor.value;
+
+      // Text visibility
+      boxText.style.display = showText.checked ? 'block' : 'none';
+
+      // Isolation on stage
+      stage.style.isolation = isolate.checked ? 'isolate' : 'auto';
+
+      // "Layer" hints
+      box.style.willChange = 'auto';
+      box.style.transform = 'none';
+      if (layerHint.value === 'will') {
+        box.style.willChange = 'transform';
+      } else if (layerHint.value === 'z') {
+        box.style.transform = 'translateZ(0)';
+      }
+
+      // Size
+      box.style.width = boxW.value + 'px';
+      box.style.height = boxH.value + 'px';
+      // Position in percentage of stage
+      const lPerc = +boxL.value;
+      const tPerc = +boxT.value;
+      const left = stage.clientWidth * lPerc / 100;
+      const top = stage.clientHeight * tPerc / 100;
+      box.style.left = left + 'px';
+      box.style.top = top + 'px';
+
+      // Swatch computation
+      const approx = computeSwatch(mode.value, fgColor.value, a, bgColor.value);
+      swatch.style.background = approx ? approx : 'repeating-conic-gradient(#ddd 0% 25%, #eee 0% 50%) 50% / 12px 12px';
+      swatch.title = approx ? `近似混合色：${approx}` : '此模式未计算，僅视觉对比';
+    }
+
+    // Drag support (to observe boundary crossing)
+    let dragging = false;
+    let startX = 0, startY = 0, startLeft = 0, startTop = 0;
+    box.addEventListener('pointerdown', (e)=>{
+      dragging = true;
+      box.setPointerCapture(e.pointerId);
+      box.classList.add('dragging');
+      startX = e.clientX;
+      startY = e.clientY;
+      startLeft = parseFloat(box.style.left || '0');
+      startTop = parseFloat(box.style.top || '0');
+    });
+    box.addEventListener('pointermove', (e)=>{
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      const newLeft = clamp(startLeft + dx, -400, stage.clientWidth + 200);
+      const newTop = clamp(startTop + dy, -300, stage.clientHeight + 200);
+      box.style.left = newLeft + 'px';
+      box.style.top = newTop + 'px';
+    });
+    function endDrag(e){
+      if (!dragging) return;
+      dragging = false;
+      box.releasePointerCapture(e.pointerId);
+      box.classList.remove('dragging');
+      // update number inputs based on final position
+      const lPerc = (parseFloat(box.style.left) / stage.clientWidth) * 100;
+      const tPerc = (parseFloat(box.style.top) / stage.clientHeight) * 100;
+      boxL.value = Math.round(lPerc);
+      boxT.value = Math.round(tPerc);
+    }
+    box.addEventListener('pointerup', endDrag);
+    box.addEventListener('pointercancel', endDrag);
+    window.addEventListener('resize', apply);
+
+    // Bind events
+    [mode, fgColor, fgAlpha, bgColor, showText, isolate, layerHint, boxW, boxH, boxL, boxT].forEach(el=>{
+      el.addEventListener('input', apply);
+      el.addEventListener('change', apply);
+    });
+
+    // Reset and random
+    resetBtn.addEventListener('click', ()=>{
+      mode.value = 'multiply';
+      fgColor.value = '#ff0000';
+      fgAlpha.value = 0.5;
+      bgColor.value = '#0000ff';
+      showText.checked = true;
+      isolate.checked = false;
+      layerHint.value = 'none';
+      boxW.value = 320; boxH.value = 200;
+      boxL.value = 30; boxT.value = 20;
+      apply();
+    });
+    randomBtn.addEventListener('click', ()=>{
+      const modes = Array.from(mode.options).map(o=>o.value);
+      mode.value = modes[Math.floor(Math.random()*modes.length)];
+      fgColor.value = '#'+Math.floor(Math.random()*0xffffff).toString(16).padStart(6,'0');
+      bgColor.value = '#'+Math.floor(Math.random()*0xffffff).toString(16).padStart(6,'0');
+      fgAlpha.value = (Math.random()*0.8 + 0.1).toFixed(2);
+      boxW.value = Math.floor(Math.random()*400)+120;
+      boxH.value = Math.floor(Math.random()*300)+120;
+      boxL.value = Math.floor(Math.random()*80);
+      boxT.value = Math.floor(Math.random()*60);
+      [showText, isolate].forEach(el=>{ el.checked = Math.random() > 0.3; });
+      const hints = ['none','will','z'];
+      layerHint.value = hints[Math.floor(Math.random()*hints.length)];
+      apply();
+    });
+
+    // Initial paint
+    apply();
+  </script>
+</body>
+</html>

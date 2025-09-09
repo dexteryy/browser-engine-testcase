@@ -1,0 +1,116 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>跨栏元素（column-span）测试</title>
+<link rel="stylesheet" href="style.css" />
+<script defer src="utils.js"></script>
+</head>
+<body>
+  <header id="topbar">
+    <h1>跨栏元素（column-span）测试</h1>
+    <p>关注：<code>column-span: all</code> 是否生效、跨栏元素的定位与与相邻内容的衔接。</p>
+  </header>
+
+  <section id="toolbar" class="container">
+    <div class="toolbar">
+      <div class="control" style="grid-column: span 3;">
+        <label>列数（column-count）：<output id="countOut"></output></label>
+        <input id="count" type="range" min="2" max="8" value="3" />
+      </div>
+      <div class="control" style="grid-column: span 3;">
+        <label>列间距（column-gap）：<output id="gapOut"></output></label>
+        <input id="gap" type="range" min="0" max="48" value="24" />
+      </div>
+      <div class="control" style="grid-column: span 3;">
+        <label>跨栏标题数量</label>
+        <input id="spanNum" type="number" min="0" max="20" value="4" />
+      </div>
+      <div class="control" style="grid-column: span 3;">
+        <label>&nbsp;</label>
+        <div class="row">
+          <button id="build" class="primary">重建内容</button>
+          <button id="toggleSupport" class="secondary">检测支持状态</button>
+        </div>
+      </div>
+      <div class="control" style="grid-column: span 12;">
+        <div id="metrics" class="meta"></div>
+      </div>
+    </div>
+  </section>
+
+  <main id="test-area" class="container">
+    <div id="mc" class="test-card columns" style="column-count:3; column-gap:24px; column-rule: 1px solid #eee;">
+      <!-- Content injected -->
+    </div>
+  </main>
+
+  <section id="explain" class="container">
+    <h2>测试说明</h2>
+    <ul>
+      <li>页面会在内容中插入多处跨栏标题，观察它们是否真正跨越所有列且位置正确。</li>
+      <li>若浏览器不支持 <code>column-span</code>，跨栏标题将回退为普通块级元素（不跨栏）。</li>
+    </ul>
+  </section>
+
+  <script>
+    window.addEventListener("DOMContentLoaded", () => {
+      const mc = $("#mc");
+      const count = $("#count"); const countOut = $("#countOut");
+      const gap = $("#gap"); const gapOut = $("#gapOut");
+      const spanNum = $("#spanNum");
+      const build = $("#build");
+      const toggleSupport = $("#toggleSupport");
+      const metrics = $("#metrics");
+
+      bindRangeOutput(count, countOut, v => v + " 列");
+      bindRangeOutput(gap, gapOut);
+
+      const apply = () => {
+        mc.style.columnCount = count.value;
+        mc.style.columnGap = gap.value + "px";
+        renderMetrics(mc, metrics);
+      };
+      [count, gap].forEach(i => i.addEventListener("input", apply));
+
+      function rebuild() {
+        mc.innerHTML = "";
+        // First spanning header
+        const header = document.createElement("div");
+        header.className = "span-all";
+        header.textContent = "跨栏标题：文档开头";
+        mc.appendChild(header);
+
+        const totalSpan = parseInt(spanNum.value, 10);
+        let inserted = 0;
+        for (let i = 0; i < 40; i++) {
+          mc.appendChild(createSectionHeading("小节标题（避免断开）"));
+          mc.appendChild(createP());
+          if (i % 3 === 2) mc.appendChild(createFigure(220 + (i % 2) * 120, i + 1));
+          if (inserted < totalSpan && i % 5 === 4) {
+            const span = document.createElement("div");
+            span.className = "span-all";
+            span.textContent = "跨栏标题（中间段落）#" + (inserted + 1);
+            mc.appendChild(span);
+            inserted++;
+          }
+        }
+        renderMetrics(mc, metrics);
+      }
+
+      build.addEventListener("click", rebuild);
+
+      toggleSupport.addEventListener("click", () => {
+        const supported = CSS && CSS.supports && CSS.supports("column-span", "all");
+        metrics.innerHTML = `当前浏览器对 <code>column-span: all</code> 的支持：<strong>${supported ? "支持" : "不支持/有限支持"}</strong>`;
+      });
+
+      rebuild();
+      apply();
+      window.addEventListener("resize", apply);
+    });
+  </script>
+</body>
+</html>

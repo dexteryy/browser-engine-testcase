@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="zh-CN" id="compare">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>测试用例9：SVG 图像嵌入与引用方式 · 对比页</title>
+  <link rel="stylesheet" href="./assets/style.css">
+  <style>
+    /* Page-local styles (English comments) */
+  </style>
+</head>
+<body>
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="inner">
+      <h1>测试用例9：SVG 图像嵌入与引用方式</h1>
+      <div class="desc">内联 / 外部引用 / CSS 背景 三种方式并排比较</div>
+      <nav class="nav">
+        <a class="active" href="./index.html">对比</a>
+        <a href="./inline.html">内联SVG</a>
+        <a href="./external.html">外部引用</a>
+        <a href="./css-background.html">CSS 背景</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Toolbar -->
+  <section class="section">
+    <div class="toolbar">
+      <div class="tool-group" style="grid-column: span 4;">
+        <h3>内联样式控制</h3>
+        <div class="tool-inline">
+          <label for="color">圆填充颜色：</label>
+          <input type="color" id="color" value="#22c55e">
+          <label for="size">显示尺寸(px)：</label>
+          <input type="range" id="size" min="120" max="360" value="220">
+          <span id="sizeVal" class="note">220</span>
+        </div>
+      </div>
+      <div class="tool-group" style="grid-column: span 4;">
+        <h3>背景 SVG 控制</h3>
+        <div class="tool-inline">
+          <label for="bgsize">background-size：</label>
+          <select id="bgsize">
+            <option value="contain" selected>contain</option>
+            <option value="cover">cover</option>
+            <option value="100% auto">100% auto</option>
+            <option value="auto 100%">auto 100%</option>
+            <option value="160px 120px">160px 120px</option>
+          </select>
+          <label><input type="checkbox" id="showOutline"> 显示背景盒轮廓</label>
+        </div>
+      </div>
+      <div class="tool-group" style="grid-column: span 4;">
+        <h3>批量与性能</h3>
+        <div class="tool-inline">
+          <label for="count">每列数量：</label>
+          <input type="range" id="count" min="1" max="60" value="6">
+          <span id="countVal" class="note">6</span>
+          <button id="render" class="primary">开始批量渲染</button>
+          <button id="reset">清空</button>
+        </div>
+        <div class="tool-inline note" id="stats">尚未测试</div>
+      </div>
+    </div>
+
+    <!-- Test Area -->
+    <div class="test-area">
+      <div class="grid-3" id="cols">
+        <!-- Inline SVG -->
+        <div class="card" id="col-inline">
+          <div class="card-head">
+            <strong>内联 SVG（可通过页面 CSS 控制）</strong>
+            <span class="note">可选中 .dot 改色</span>
+          </div>
+          <div class="card-body">
+            <div class="sample-box wide" id="inlineWrap"></div>
+            <div class="note">预期：圆形显示为来自页面 CSS 的颜色（默认绿色）。放大缩小时应保持清晰无锯齿。</div>
+          </div>
+        </div>
+
+        <!-- External via <img> -->
+        <div class="card" id="col-external">
+          <div class="card-head">
+            <strong>外部 SVG 引用（&lt;img src&gt;）</strong>
+            <span class="note">页面 CSS 无法选中内部元素</span>
+          </div>
+          <div class="card-body">
+            <div class="sample-box wide" id="externalWrap"></div>
+            <div class="note">预期：圆形保持文件内的红色，不受页面 CSS 影响；多次使用可被缓存。</div>
+          </div>
+        </div>
+
+        <!-- CSS Background -->
+        <div class="card" id="col-bg">
+          <div class="card-head">
+            <strong>CSS 背景 SVG（background-image）</strong>
+            <span class="note">作为图像资源呈现</span>
+          </div>
+          <div class="card-body">
+            <div class="sample-box wide" id="bgWrap"></div>
+            <div class="note">预期：背景图按 background-size 渲染，保持比例，无模糊。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Explanation -->
+  <section class="section explain">
+    <h2>解释说明</h2>
+    <p><strong>测试目标：</strong>验证 Chrome 对三种常见 SVG 使用方式的渲染支持与差异：内联、外部引用、CSS 背景。</p>
+    <p><strong>测试方案：</strong>上方并排展示三列，内容一致（黑色矩形+圆形）。内联版本的圆形带有类名 <code class="code">.dot</code>，由<strong>页面 CSS</strong>改变填充色；外部引用与背景版本不展开为页面 DOM，其内部元素<strong>不可直接被页面 CSS 选择</strong>。</p>
+    <p><strong>使用方法：</strong>通过工具栏调整内联圆的颜色、元素尺寸以及背景图的 <code class="code">background-size</code>。使用“批量渲染”可一次性生成多份以观察缓存与渲染稳定性；右侧统计仅反映 DOM 插入/加载事件完成时间，<em>并非严格的解码性能</em>。</p>
+    <p><strong>结果评估：</strong>放大页面或在高 DPI 屏幕下查看，三列均应保持矢量清晰度；内联圆应随页面 CSS 即时变色，而外部与背景版本应保持文件内的红色。DevTools 中可看到：内联列能直接展开 SVG 子元素；外部/背景列只看到单一节点或 CSS 背景。</p>
+  </section>
+
+  <footer class="footer">© 测试用例 9 · 仅使用原生 HTML/CSS/JS · 适配最新 Chromium</footer>
+
+  <script>
+    // Utilities (English comments)
+    const $ = (s, el=document)=>el.querySelector(s);
+    const $$ = (s, el=document)=>Array.from(el.querySelectorAll(s));
+
+    const color = $("#color");
+    const size = $("#size");
+    const sizeVal = $("#sizeVal");
+    const bgsize = $("#bgsize");
+    const showOutline = $("#showOutline");
+    const count = $("#count");
+    const countVal = $("#countVal");
+    const stats = $("#stats");
+    const inlineWrap = $("#inlineWrap");
+    const externalWrap = $("#externalWrap");
+    const bgWrap = $("#bgWrap");
+    const renderBtn = $("#render");
+    const resetBtn = $("#reset");
+
+    // Render a single sample for each column
+    function createInlineSample(w){
+      const box = document.createElement("div");
+      box.className = "sample-box";
+      box.style.width = w + "px";
+      box.style.height = Math.round(w * 0.68) + "px";
+      // Inline SVG node with a class .dot that page CSS can target
+      box.innerHTML = `
+        <svg class="sample-inline" width="100%" height="100%" viewBox="0 0 260 160" role="img" aria-label="内联 SVG">
+          <rect class="rect" x="30" y="60" width="200" height="60" rx="6" fill="#111" opacity=".75"></rect>
+          <circle class="dot" cx="90" cy="80" r="30"></circle>
+          <text x="135" y="95" font-size="14" fill="#fff" font-family="system-ui, -apple-system, Arial">INLINE</text>
+        </svg>
+      `;
+      box.querySelector("svg").style.setProperty("--inline-dot-fill", color.value);
+      return box;
+    }
+
+    function createExternalSample(w){
+      const box = document.createElement("div");
+      box.className = "sample-box";
+      box.style.width = w + "px";
+      box.style.height = Math.round(w * 0.68) + "px";
+      const img = document.createElement("img");
+      img.src = "./assets/example.svg";
+      img.alt = "外部 SVG";
+      img.width = w;
+      img.height = Math.round(w * 0.68);
+      img.decoding = "async";
+      img.loading = "eager";
+      // Wait for load to measure
+      box.appendChild(img);
+      return {box, img};
+    }
+
+    function createBgSample(w){
+      const box = document.createElement("div");
+      box.className = "bg-sample";
+      box.style.width = w + "px";
+      box.style.height = Math.round(w * 0.68) + "px";
+      box.style.setProperty("--bg-size", bgsize.value);
+      if(showOutline.checked){
+        box.style.outline = "2px solid rgba(11,87,208,0.30)";
+      }else{
+        box.style.outline = "0";
+      }
+      return box;
+    }
+
+    function refreshSingles(){
+      inlineWrap.innerHTML = "";
+      externalWrap.innerHTML = "";
+      bgWrap.innerHTML = "";
+      const w = +size.value;
+      inlineWrap.appendChild(createInlineSample(w));
+      const {box, img} = createExternalSample(w);
+      externalWrap.appendChild(box);
+      // Background single
+      bgWrap.appendChild(createBgSample(w));
+      sizeVal.textContent = w;
+      stats.textContent = "尚未测试";
+    }
+
+    // Batch render for crude performance comparison
+    async function batchRender(){
+      const n = +count.value;
+      const w = +size.value;
+      // Clear previous
+      inlineWrap.innerHTML = "";
+      externalWrap.innerHTML = "";
+      bgWrap.innerHTML = "";
+
+      // Inline: quick create
+      const t0 = performance.now();
+      for(let i=0;i<n;i++){
+        inlineWrap.appendChild(createInlineSample(w));
+      }
+      const t1 = performance.now();
+
+      // External <img>: wait for all loads
+      const t2 = performance.now();
+      const loads = [];
+      for(let i=0;i<n;i++){
+        const {box, img} = createExternalSample(w);
+        externalWrap.appendChild(box);
+        loads.push(new Promise(res=>{
+          if(img.complete) return res();
+          img.addEventListener("load", res, {once:true});
+          img.addEventListener("error", res, {once:true}); // ignore errors
+        }));
+      }
+      await Promise.all(loads);
+      const t3 = performance.now();
+
+      // CSS background: just append boxes; image is shared/cached
+      const t4 = performance.now();
+      for(let i=0;i<n;i++){
+        bgWrap.appendChild(createBgSample(w));
+      }
+      const t5 = performance.now();
+
+      stats.textContent = `结果：内联 DOM 插入 ${(t1 - t0).toFixed(1)} ms · 外部 <img> 插入+加载 ${(t3 - t2).toFixed(1)} ms · 背景节点插入 ${(t5 - t4).toFixed(1)} ms （数量=${n}，仅供参考）`;
+    }
+
+    // Wire up controls
+    color.addEventListener("input", ()=>{
+      $$(".sample-inline", document).forEach(svg=>{
+        svg.style.setProperty("--inline-dot-fill", color.value);
+      });
+    });
+    size.addEventListener("input", ()=>{
+      sizeVal.textContent = size.value;
+      refreshSingles();
+    });
+    bgsize.addEventListener("change", refreshSingles);
+    showOutline.addEventListener("change", refreshSingles);
+    count.addEventListener("input", ()=>countVal.textContent = count.value);
+    renderBtn.addEventListener("click", batchRender);
+    resetBtn.addEventListener("click", refreshSingles);
+
+    // Initial render
+    refreshSingles();
+  </script>
+</body>
+</html>

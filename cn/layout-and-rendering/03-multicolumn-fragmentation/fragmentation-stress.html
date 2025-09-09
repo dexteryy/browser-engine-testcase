@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>复杂分栏与避断（Fragmentation 压力）测试</title>
+    <link rel="stylesheet" href="style.css" />
+    <script defer src="utils.js"></script>
+  </head>
+  <body>
+    <header id="topbar">
+      <h1>复杂分栏与避断（Fragmentation 压力）测试</h1>
+      <p>关注：长内容、多图与避断规则下的首次渲染时间与滚动性能。</p>
+    </header>
+
+    <section id="toolbar" class="container">
+      <div class="toolbar">
+        <div class="control" style="grid-column: span 3">
+          <label>列数（column-count）：<output id="countOut"></output></label>
+          <input id="count" type="range" min="2" max="8" value="4" />
+        </div>
+        <div class="control" style="grid-column: span 3">
+          <label>列间距（column-gap）：<output id="gapOut"></output></label>
+          <input id="gap" type="range" min="0" max="48" value="24" />
+        </div>
+        <div class="control" style="grid-column: span 3">
+          <label>段落数量</label>
+          <input id="paraNum" type="number" min="50" max="2000" value="400" />
+        </div>
+        <div class="control" style="grid-column: span 3">
+          <label>每隔 N 段插入图片</label>
+          <input id="every" type="number" min="0" max="20" value="5" />
+        </div>
+        <div class="control" style="grid-column: span 3">
+          <label>图片高度模式</label>
+          <select id="imgMode">
+            <option value="mix" selected>混合（140/220/320/420）</option>
+            <option value="tall">较高（360/420/480）</option>
+            <option value="short">较矮（120/160/200）</option>
+          </select>
+        </div>
+        <div class="control" style="grid-column: span 3">
+          <label>图片与小标题避断</label>
+          <select id="avoid">
+            <option value="on" selected>启用（break-inside: avoid）</option>
+            <option value="off">禁用</option>
+          </select>
+        </div>
+        <div class="control" style="grid-column: span 6">
+          <label>&nbsp;</label>
+          <div class="row">
+            <button id="build" class="primary">构建内容并测量</button>
+            <button id="autoScroll" class="secondary">
+              自动滚动测试（8s）
+            </button>
+            <button id="clear" class="secondary">清空内容</button>
+          </div>
+        </div>
+        <div class="control" style="grid-column: span 12">
+          <div id="metrics" class="results">等待测量…</div>
+        </div>
+      </div>
+    </section>
+
+    <main id="test-area" class="container">
+      <div
+        id="mc"
+        class="test-card columns"
+        style="
+          height: 600px;
+          overflow: auto;
+          column-count: 4;
+          column-gap: 24px;
+          column-fill: balance;
+          column-rule: 1px solid #eee;
+        ">
+        <!-- Content area -->
+      </div>
+    </main>
+
+    <section id="explain" class="container">
+      <h2>测试说明</h2>
+      <ul>
+        <li>
+          点击“构建内容并测量”，脚本会批量生成段落、图片与小标题，并测量构建阶段与首帧前后的耗时（近似）。
+        </li>
+        <li>
+          “自动滚动测试”会以固定速度滚动容器，估算平均 FPS
+          与潜在掉帧次数（基于帧间隔阈值的简单启发）。
+        </li>
+        <li>
+          通过切换“避断”观察图片或小标题在列间的整体移动是否正确，是否存在半截渲染或闪烁。
+        </li>
+      </ul>
+    </section>
+
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        const mc = $("#mc");
+        const count = $("#count");
+        const countOut = $("#countOut");
+        const gap = $("#gap");
+        const gapOut = $("#gapOut");
+        const paraNum = $("#paraNum");
+        const every = $("#every");
+        const imgMode = $("#imgMode");
+        const avoid = $("#avoid");
+        const buildBtn = $("#build");
+        const autoBtn = $("#autoScroll");
+        const clearBtn = $("#clear");
+        const metrics = $("#metrics");
+
+        bindRangeOutput(count, countOut, v => v + " 列");
+        bindRangeOutput(gap, gapOut);
+
+        const imgSets = {
+          mix: [140, 220, 320, 420],
+          tall: [360, 420, 480],
+          short: [120, 160, 200],
+        };
+
+        const applyStyle = () => {
+          mc.style.columnCount = count.value;
+          mc.style.columnGap = gap.value + "px";
+          renderMetrics(mc, metrics);
+        };
+        applyStyle();
+        [count, gap].forEach(i => i.addEventListener("input", applyStyle));
+        window.addEventListener("resize", applyStyle);
+
+        const longObs = createLongTaskObserver();
+
+        function buildAndMeasure() {
+          mc.innerHTML = "";
+          const pNum = parseInt(paraNum.value, 10);
+          const n = parseInt(every.value || "0", 10);
+          const heights = imgSets[imgMode.value];
+
+          // Toggle avoid-break classes
+          const avoidOn = avoid.value === "on";
+
+          mark("build:start");
+          // Spanning header
+          const span = document.createElement("div");
+          span.className = "span-all";
+          span.textContent = "跨栏标题：Fragmentation 压力测试";
+          mc.appendChild(span);
+
+          let figIdx = 1;
+          for (let i = 0; i < pNum; i++) {
+            // heading
+            const h = document.createElement("h3");
+            h.className = "section" + (avoidOn ? " avoid-break" : "");
+            h.textContent = "小节 #" + (i + 1);
+            mc.appendChild(h);
+
+            // paragraph
+            const p = createP();
+            if (avoidOn && Math.random() < 0.05) p.classList.add("avoid-break");
+            mc.appendChild(p);
+
+            // figure every N
+            if (n > 0 && i % n === n - 1) {
+              const f = document.createElement("figure");
+              if (avoidOn) f.className = "avoid-break";
+              const svg = createSVGPlaceholder(
+                800,
+                heights[i % heights.length],
+                `图像 ${figIdx}`,
+              );
+              const cap = document.createElement("figcaption");
+              cap.textContent =
+                "说明：此图用于测试不可拆分元素在多栏中的行为。";
+              f.appendChild(svg);
+              f.appendChild(cap);
+              mc.appendChild(f);
+              figIdx++;
+            }
+          }
+          mark("build:end");
+
+          // Force layout and wait a frame
+          const _h = mc.clientHeight; // sync layout read
+          longObs.start();
+          return new Promise(resolve => {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                longObs.stop();
+                mark("raf:end");
+                const buildMs = measure("build", "build:start", "build:end");
+                const twoRafMs = measure(
+                  "toFirstFrame",
+                  "build:end",
+                  "raf:end",
+                );
+                const summary = longObs.summary();
+                const cols = computeEffectiveColumns(mc);
+                metrics.innerHTML = `
+                <div>构建用时：<strong>${Math.round(
+                  buildMs,
+                )} ms</strong>，首帧等待（两帧）：<strong>${Math.round(
+                  twoRafMs,
+                )} ms</strong></div>
+                <div>观察到的长任务：<strong>${
+                  summary.count
+                }</strong> 个，最大：<strong>${
+                  summary.max
+                } ms</strong>，平均：<strong>${summary.avg} ms</strong></div>
+                <div class="meta">实际列数：${cols}；提示：此测量为近似值，更多细节请使用 DevTools Performance 面板。</div>
+              `;
+                resolve();
+              });
+            });
+          });
+        }
+
+        buildBtn.addEventListener("click", buildAndMeasure);
+        clearBtn.addEventListener("click", () => {
+          mc.innerHTML = "";
+          metrics.textContent = "已清空";
+        });
+
+        autoBtn.addEventListener("click", async () => {
+          if (!mc.firstChild) await buildAndMeasure();
+          autoBtn.disabled = true;
+          const { fps, frames, drops } = await autoScroll(mc, 8000, 700);
+          autoBtn.disabled = false;
+          const cols = computeEffectiveColumns(mc);
+          const note = document.createElement("div");
+          note.innerHTML = `自动滚动估算 FPS：<strong>${fps}</strong>（帧数：${frames}，掉帧阈值超标：${drops} 次）<span class="badge">列数：${cols}</span>`;
+          metrics.appendChild(note);
+        });
+      });
+    </script>
+  </body>
+</html>

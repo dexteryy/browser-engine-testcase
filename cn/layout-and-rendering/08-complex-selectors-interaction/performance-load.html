@@ -1,0 +1,1902 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>测试用例8：复杂选择器与交互状态布局 · 性能压力</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="container headline">
+      <h1>测试用例8：复杂选择器与交互状态布局</h1>
+      <p>子场景：大量元素 + 交互引发的选择器匹配压力，观察 Recalculate Style 的耗时。</p>
+    </div>
+  </header>
+
+  <!-- Toolbar -->
+  <section class="toolbar">
+    <div class="container controls" role="group" aria-label="工具栏">
+      <div class="control">
+        <input id="perf-shadow" type="checkbox">
+        <label for="perf-shadow">卡片强阴影</label>
+      </div>
+      <div class="control">
+        <input id="perf-cols-3" name="perf-cols" type="radio">
+        <label for="perf-cols-3">三列</label>
+      </div>
+      <div class="control">
+        <input id="perf-cols-4" name="perf-cols" type="radio">
+        <label for="perf-cols-4">四列</label>
+      </div>
+      <div class="control">
+        <input id="perf-stress" type="checkbox">
+        <label for="perf-stress">压力选择器（叠加规则）</label>
+      </div>
+      <div class="help">所有选项均通过 <code>body:has(#id:checked)</code> 纯 CSS 触发。</div>
+    </div>
+  </section>
+
+  <!-- Test Area -->
+  <main class="section">
+    <div class="container">
+      <h2>测试区域 · 大量可折叠项</h2>
+      <p class="help">建议配合 DevTools → Performance 录制，观察点击“展开详情”时的样式重计算（Recalculate Style）开销。</p>
+      <div class="grid">
+        
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 1</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p001">展开详情</label>
+              <input id="p001" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 1）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 2</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p002">展开详情</label>
+              <input id="p002" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 2）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 3</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p003">展开详情</label>
+              <input id="p003" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 3）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 4</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p004">展开详情</label>
+              <input id="p004" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 4）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 5</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p005">展开详情</label>
+              <input id="p005" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 5）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 6</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p006">展开详情</label>
+              <input id="p006" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 6）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 7</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p007">展开详情</label>
+              <input id="p007" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 7）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 8</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p008">展开详情</label>
+              <input id="p008" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 8）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 9</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p009">展开详情</label>
+              <input id="p009" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 9）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 10</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p010">展开详情</label>
+              <input id="p010" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 10）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 11</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p011">展开详情</label>
+              <input id="p011" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 11）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 12</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p012">展开详情</label>
+              <input id="p012" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 12）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 13</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p013">展开详情</label>
+              <input id="p013" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 13）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 14</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p014">展开详情</label>
+              <input id="p014" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 14）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 15</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p015">展开详情</label>
+              <input id="p015" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 15）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 16</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p016">展开详情</label>
+              <input id="p016" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 16）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 17</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p017">展开详情</label>
+              <input id="p017" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 17）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 18</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p018">展开详情</label>
+              <input id="p018" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 18）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 19</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p019">展开详情</label>
+              <input id="p019" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 19）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 20</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p020">展开详情</label>
+              <input id="p020" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 20）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 21</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p021">展开详情</label>
+              <input id="p021" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 21）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 22</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p022">展开详情</label>
+              <input id="p022" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 22）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 23</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p023">展开详情</label>
+              <input id="p023" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 23）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 24</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p024">展开详情</label>
+              <input id="p024" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 24）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 25</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p025">展开详情</label>
+              <input id="p025" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 25）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 26</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p026">展开详情</label>
+              <input id="p026" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 26）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 27</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p027">展开详情</label>
+              <input id="p027" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 27）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 28</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p028">展开详情</label>
+              <input id="p028" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 28）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 29</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p029">展开详情</label>
+              <input id="p029" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 29）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 30</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p030">展开详情</label>
+              <input id="p030" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 30）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 31</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p031">展开详情</label>
+              <input id="p031" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 31）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 32</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p032">展开详情</label>
+              <input id="p032" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 32）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 33</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p033">展开详情</label>
+              <input id="p033" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 33）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 34</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p034">展开详情</label>
+              <input id="p034" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 34）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 35</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p035">展开详情</label>
+              <input id="p035" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 35）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 36</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p036">展开详情</label>
+              <input id="p036" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 36）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 37</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p037">展开详情</label>
+              <input id="p037" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 37）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 38</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p038">展开详情</label>
+              <input id="p038" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 38）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 39</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p039">展开详情</label>
+              <input id="p039" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 39）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 40</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p040">展开详情</label>
+              <input id="p040" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 40）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 41</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p041">展开详情</label>
+              <input id="p041" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 41）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 42</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p042">展开详情</label>
+              <input id="p042" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 42）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 43</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p043">展开详情</label>
+              <input id="p043" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 43）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 44</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p044">展开详情</label>
+              <input id="p044" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 44）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 45</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p045">展开详情</label>
+              <input id="p045" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 45）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 46</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p046">展开详情</label>
+              <input id="p046" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 46）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 47</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p047">展开详情</label>
+              <input id="p047" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 47）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 48</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p048">展开详情</label>
+              <input id="p048" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 48）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 49</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p049">展开详情</label>
+              <input id="p049" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 49）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 50</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p050">展开详情</label>
+              <input id="p050" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 50）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 51</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p051">展开详情</label>
+              <input id="p051" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 51）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 52</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p052">展开详情</label>
+              <input id="p052" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 52）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 53</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p053">展开详情</label>
+              <input id="p053" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 53）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 54</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p054">展开详情</label>
+              <input id="p054" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 54）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 55</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p055">展开详情</label>
+              <input id="p055" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 55）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 56</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p056">展开详情</label>
+              <input id="p056" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 56）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 57</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p057">展开详情</label>
+              <input id="p057" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 57）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 58</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p058">展开详情</label>
+              <input id="p058" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 58）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 59</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p059">展开详情</label>
+              <input id="p059" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 59）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 60</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p060">展开详情</label>
+              <input id="p060" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 60）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 61</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p061">展开详情</label>
+              <input id="p061" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 61）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 62</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p062">展开详情</label>
+              <input id="p062" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 62）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 63</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p063">展开详情</label>
+              <input id="p063" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 63）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 64</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p064">展开详情</label>
+              <input id="p064" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 64）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 65</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p065">展开详情</label>
+              <input id="p065" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 65）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 66</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p066">展开详情</label>
+              <input id="p066" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 66）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 67</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p067">展开详情</label>
+              <input id="p067" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 67）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 68</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p068">展开详情</label>
+              <input id="p068" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 68）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 69</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p069">展开详情</label>
+              <input id="p069" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 69）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 70</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p070">展开详情</label>
+              <input id="p070" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 70）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 71</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p071">展开详情</label>
+              <input id="p071" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 71）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 72</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p072">展开详情</label>
+              <input id="p072" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 72）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 73</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p073">展开详情</label>
+              <input id="p073" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 73）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 74</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p074">展开详情</label>
+              <input id="p074" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 74）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 75</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p075">展开详情</label>
+              <input id="p075" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 75）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 76</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p076">展开详情</label>
+              <input id="p076" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 76）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 77</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p077">展开详情</label>
+              <input id="p077" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 77）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 78</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p078">展开详情</label>
+              <input id="p078" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 78）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 79</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p079">展开详情</label>
+              <input id="p079" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 79）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 80</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p080">展开详情</label>
+              <input id="p080" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 80）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 81</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p081">展开详情</label>
+              <input id="p081" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 81）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 82</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p082">展开详情</label>
+              <input id="p082" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 82）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 83</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p083">展开详情</label>
+              <input id="p083" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 83）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 84</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p084">展开详情</label>
+              <input id="p084" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 84）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 85</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p085">展开详情</label>
+              <input id="p085" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 85）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 86</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p086">展开详情</label>
+              <input id="p086" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 86）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 87</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p087">展开详情</label>
+              <input id="p087" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 87）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 88</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p088">展开详情</label>
+              <input id="p088" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 88）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 89</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p089">展开详情</label>
+              <input id="p089" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 89）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 90</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p090">展开详情</label>
+              <input id="p090" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 90）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 91</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p091">展开详情</label>
+              <input id="p091" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 91）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 92</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p092">展开详情</label>
+              <input id="p092" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 92）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 93</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p093">展开详情</label>
+              <input id="p093" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 93）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 94</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p094">展开详情</label>
+              <input id="p094" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 94）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 95</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p095">展开详情</label>
+              <input id="p095" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 95）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 96</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p096">展开详情</label>
+              <input id="p096" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 96）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 97</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p097">展开详情</label>
+              <input id="p097" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 97）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 98</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p098">展开详情</label>
+              <input id="p098" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 98）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 99</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p099">展开详情</label>
+              <input id="p099" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 99）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 100</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p100">展开详情</label>
+              <input id="p100" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 100）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 101</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p101">展开详情</label>
+              <input id="p101" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 101）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 102</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p102">展开详情</label>
+              <input id="p102" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 102）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 103</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p103">展开详情</label>
+              <input id="p103" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 103）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 104</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p104">展开详情</label>
+              <input id="p104" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 104）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 105</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p105">展开详情</label>
+              <input id="p105" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 105）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 106</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p106">展开详情</label>
+              <input id="p106" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 106）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 107</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p107">展开详情</label>
+              <input id="p107" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 107）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+
+        <article class="card item" tabindex="-1">
+          <div class="head">
+            <div class="title">项 108</div>
+            <div class="actions">
+              <label class="toggle-btn" for="p108">展开详情</label>
+              <input id="p108" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p class="meta">用于性能压力测试的条目（编号 108）。快速交替展开/收起以观察样式重计算。</p>
+            <div class="note">提示：启用上方「压力选择器」后，多个叠加的 <code>:has()</code>/<code>:not()</code>/<code>:nth-child()</code> 规则将同步参与匹配。</div>
+            <div class="form-mini">
+              <input type="text" placeholder="键盘聚焦也会触发 :has() 边界高亮">
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </main>
+
+  <!-- Explanation -->
+  <section class="section">
+    <div class="container explain">
+      <h2>解释说明</h2>
+      <p><strong>测试目标：</strong>在不使用 JavaScript 的情况下，通过 <code>:has()</code> 等复杂选择器构建交互，放大样式匹配的代价以便观察。</p>
+      <p><strong>使用方法：</strong></p>
+      <ol class="steps">
+        <li>勾选「压力选择器」，快速在不同卡片间点击“展开详情”。</li>
+        <li>切换「三列/四列」影响布局密度，观察重排 + 重绘与样式重算配比。</li>
+        <li>在任一卡片的输入框内使用 <kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd>，验证 <code>.item:has(.form-mini input:focus)</code> 的外框高亮。</li>
+      </ol>
+      <p class="help">返回：<a href="index.html">主场景</a> · <a href="nested-forms.html">嵌套表单</a></p>
+    </div>
+  </section>
+</body>
+</html>

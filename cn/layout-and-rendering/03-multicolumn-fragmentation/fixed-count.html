@@ -1,0 +1,144 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>固定列数（column-count）测试</title>
+<link rel="stylesheet" href="style.css" />
+<script defer src="utils.js"></script>
+</head>
+<body>
+  <header id="topbar">
+    <h1>固定列数（column-count）测试</h1>
+    <p>关注：固定列数情况下的文本/图片分栏、列间距与列分隔线渲染，以及避断规则生效情况。</p>
+  </header>
+
+  <section id="toolbar" class="container">
+    <div class="toolbar">
+      <div class="control" style="grid-column: span 3;">
+        <label>列数（column-count）：<output id="countOut"></output></label>
+        <input id="count" type="range" min="1" max="8" value="3" />
+      </div>
+      <div class="control" style="grid-column: span 3;">
+        <label>列间距（column-gap）：<output id="gapOut"></output></label>
+        <input id="gap" type="range" min="0" max="48" value="24" />
+      </div>
+      <div class="control" style="grid-column: span 3;">
+        <label>列分隔线（column-rule 宽度）：<output id="ruleWOut"></output></label>
+        <input id="ruleW" type="range" min="0" max="8" value="1" />
+      </div>
+      <div class="control" style="grid-column: span 3;">
+        <label>列分隔线样式</label>
+        <select id="ruleStyle">
+          <option value="none">none</option>
+          <option value="solid" selected>solid</option>
+          <option value="dashed">dashed</option>
+          <option value="dotted">dotted</option>
+          <option value="double">double</option>
+        </select>
+      </div>
+      <div class="control" style="grid-column: span 3;">
+        <label>列分隔线颜色</label>
+        <input id="ruleColor" type="color" value="#dddddd" />
+      </div>
+      <div class="control" style="grid-column: span 3;">
+        <label>column-fill</label>
+        <select id="fill">
+          <option value="balance" selected>balance（默认）</option>
+          <option value="auto">auto</option>
+        </select>
+      </div>
+      <div class="control" style="grid-column: span 3;">
+        <label>容器高度</label>
+        <select id="heightMode">
+          <option value="auto">自适应</option>
+          <option value="fixed" selected>固定（560px）</option>
+        </select>
+      </div>
+      <div class="control" style="grid-column: span 3;">
+        <label>&nbsp;</label>
+        <div class="row">
+          <button id="more" class="secondary">插入更多内容</button>
+          <button id="reset" class="secondary">重置内容</button>
+        </div>
+      </div>
+      <div class="control" style="grid-column: span 12;">
+        <div id="metrics" class="meta"></div>
+      </div>
+    </div>
+  </section>
+
+  <main id="test-area" class="container">
+    <div id="mc" class="test-card columns" style="height: 560px; overflow:auto; column-count:3; column-gap:24px; column-rule: 1px solid #ddd;">
+      <!-- Content will be injected by JS -->
+    </div>
+    <div class="results meta">提示：<code>break-inside: avoid</code> 已用于小标题和图片的容器，以避免被拆分到不同列。</div>
+  </main>
+
+  <section id="explain" class="container">
+    <h2>测试说明</h2>
+    <ul>
+      <li>调整列数与列间距，观察文本与图片在各列中的分布是否均衡。</li>
+      <li>改变 <code>column-fill</code> 与容器高度模式，比较内容是否尽量均衡填满或顺序填充。</li>
+      <li>注意设置了“避免断开”的元素应整体出现在单列中，不应被截断。</li>
+      <li>使用列分隔线以检查分隔线渲染的正确性（位置、样式、颜色）。</li>
+    </ul>
+  </section>
+
+  <script>
+    // Page logic
+    window.addEventListener("DOMContentLoaded", () => {
+      const mc = $("#mc");
+      const count = $("#count");
+      const countOut = $("#countOut");
+      const gap = $("#gap");
+      const gapOut = $("#gapOut");
+      const ruleW = $("#ruleW");
+      const ruleWOut = $("#ruleWOut");
+      const ruleStyle = $("#ruleStyle");
+      const ruleColor = $("#ruleColor");
+      const fill = $("#fill");
+      const heightMode = $("#heightMode");
+      const more = $("#more");
+      const reset = $("#reset");
+      const metrics = $("#metrics");
+
+      bindRangeOutput(count, countOut, v => v + " 列");
+      bindRangeOutput(gap, gapOut);
+      bindRangeOutput(ruleW, ruleWOut);
+
+      const applyStyles = () => {
+        mc.style.columnCount = count.value;
+        mc.style.columnGap = gap.value + "px";
+        mc.style.columnRule = `${ruleW.value}px ${ruleStyle.value} ${ruleColor.value}`;
+        mc.style.columnFill = fill.value;
+        if (heightMode.value === "fixed") {
+          mc.style.height = "560px";
+          mc.style.overflow = "auto";
+        } else {
+          mc.style.height = "auto";
+          mc.style.overflow = "visible";
+        }
+        renderMetrics(mc, metrics);
+      };
+
+      const populate = (append = false) => {
+        if (!append) mc.innerHTML = "";
+        const startIdx = mc.querySelectorAll("figure").length + 1;
+        fillContent(mc, { paragraphs: append ? 10 : 30, startIndex: startIdx, withSpanningHeader: true });
+        renderMetrics(mc, metrics);
+      };
+
+      populate(false);
+      applyStyles();
+
+      // Events
+      [count, gap, ruleW, ruleStyle, ruleColor, fill, heightMode].forEach(i => i.addEventListener("input", applyStyles));
+      more.addEventListener("click", () => populate(true));
+      reset.addEventListener("click", () => populate(false));
+      window.addEventListener("resize", () => renderMetrics(mc, metrics));
+    });
+  </script>
+</body>
+</html>

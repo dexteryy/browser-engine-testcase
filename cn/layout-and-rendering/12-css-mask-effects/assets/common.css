@@ -1,0 +1,86 @@
+
+/* Common UI style for all pages (comments in English).
+   Visible texts are in Chinese per project requirements. */
+:root{
+  --page-width: 1080px;
+  --accent: #0b6bff;
+  --border: #e5e7eb;
+  --muted: #6b7280;
+  --bg-soft: #f8fafc;
+  --radius: 10px;
+  --code: #111827;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:#fff;color:#111;font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "Heiti SC", Arial, sans-serif;line-height:1.6;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{text-decoration:underline;}
+.container{width:var(--page-width);max-width:95vw;margin:0 auto;padding:0 12px;}
+.topbar{width:100%;background:#fff;border-bottom:1px solid var(--border);padding:18px 0;position:sticky;top:0;z-index:10;}
+.topbar .title{font-size:20px;font-weight:700;margin:0;}
+.topbar .desc{color:var(--muted);margin:4px 0 0 0;font-size:14px;}
+.toolbar{background:var(--bg-soft);border-bottom:1px solid var(--border);}
+.toolbar .container{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;padding:12px 0;}
+.control{display:flex;flex-direction:column;gap:6px;min-width:180px;}
+.control label{font-size:13px;color:#374151;}
+.control input[type="range"]{width:250px;}
+.control input[type="text"], .control select{height:34px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:#fff;}
+.control .value{font-size:12px;color:var(--muted);}
+.btn{border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;}
+.btn.ghost{background:#fff;color:var(--accent);}
+.btn:active{transform:translateY(1px);}
+.status{margin-left:auto;color:var(--muted);font-size:13px;display:flex;align-items:center;gap:10px;}
+.section{padding:18px 0;}
+.section h2{font-size:16px;margin:6px 0 12px 0;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.card{border:1px solid var(--border);border-radius:var(--radius);padding:12px;background:#fff;position:relative;}
+.card h3{margin:0 0 10px 0;font-size:14px;color:#111;}
+.card .box{width:320px;height:320px;border-radius:12px;background:#d1d5db;display:flex;align-items:center;justify-content:center;overflow:visible;position:relative;}
+.card .box.large{width:480px;height:300px;}
+.small-note{font-size:12px;color:var(--muted);}
+.legend{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted);}
+.badge{display:inline-block;padding:2px 8px;border:1px solid var(--border);border-radius:999px;font-size:12px;background:#fff;color:#374151;}
+.kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;border:1px solid var(--border);background:#f3f4f6;border-radius:6px;padding:2px 6px;font-size:12px;}
+code{background:#f3f4f6;border:1px solid var(--border);border-radius:6px;padding:2px 6px;color:var(--code);}
+.footer-note{color:var(--muted);font-size:12px;margin-top:10px;}
+.checker{ /* checkerboard to visualize transparency */ 
+  background-image: linear-gradient(45deg, #0000 25%, #e5e7eb 25% 50%, #0000 50% 75%, #e5e7eb 75%),
+                    linear-gradient(45deg, #e5e7eb 25%, #0000 25% 50%, #e5e7eb 50% 75%, #0000 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 8px 8px;
+}
+/* Transparent test backdrop behind masked element */
+.transparent-backdrop{
+  position:absolute;inset:0;border-radius:inherit;pointer-events:none;mix-blend-mode:normal;opacity:1;
+  background: repeating-linear-gradient(90deg, rgba(253, 164, 175, .25) 0 18px, rgba(147, 197, 253,.25) 18px 36px);
+  z-index:0;
+}
+/* Box content image (SVG illustration) */
+.photo{
+  position:absolute;inset:0;background:#c7d2fe url('./assets/avatar.svg') center/cover no-repeat;
+  border-radius:inherit;z-index:1;
+}
+/* Masked target */
+.mask-target{
+  position:relative;
+  border-radius:0; /* Make sure rounded corners don't interfere with mask */
+  background:#9ca3af; /* fallback color if image fails */
+  overflow:visible;
+}
+/* Reference (no mask) */
+.ref-target{position:relative;}
+
+/* Explanation block */
+.explain{border:1px dashed var(--border);border-radius:var(--radius);padding:12px;background:#fff;}
+.list{padding-left:18px;}
+.list li{margin:6px 0;}
+/* Simple table for metrics */
+table.metrix{border-collapse:collapse;width:100%;}
+table.metrix th, table.metrix td{border:1px solid var(--border);padding:6px 8px;font-size:12px;text-align:left;}
+table.metrix th{background:#f8fafc}
+/* Perf bars */
+.bar{height:8px;background:#e5e7eb;border-radius:6px;overflow:hidden;}
+.bar>i{display:block;height:100%;background:#0ea5e9;}
+/* Page navigation */
+.nav{display:flex;gap:10px;flex-wrap:wrap;}
+.nav a{display:inline-block;border:1px solid var(--border);padding:8px 10px;border-radius:8px;background:#fff;}
+.nav a:hover{border-color:#cbd5e1}

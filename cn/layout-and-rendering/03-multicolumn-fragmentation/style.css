@@ -1,0 +1,217 @@
+/* ---------- Global layout & theme (English comments only) ---------- */
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, "Noto Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    sans-serif;
+  background: #fff;
+  color: #222;
+  line-height: 1.6;
+}
+
+#topbar {
+  width: 100%;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 16px 24px;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 100;
+}
+#topbar h1 {
+  margin: 0 0 4px 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+#topbar p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px 24px;
+}
+
+/* Toolbar with responsive grid for controls */
+.toolbar {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 12px;
+  align-items: end;
+}
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  grid-column: span 3;
+}
+.control label {
+  font-size: 12px;
+  color: #555;
+}
+.control input[type="range"] {
+  width: 100%;
+}
+.control input[type="number"],
+.control input[type="text"],
+.control select {
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+.control .row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+button.primary {
+  padding: 8px 12px;
+  border: 1px solid #0d6efd;
+  background: #0d6efd;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+button.secondary {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  background: #f6f6f6;
+  color: #222;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.meta {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Test area card */
+.test-card {
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 16px;
+  min-height: 420px;
+  background: #fff;
+  overflow: hidden;
+}
+
+/* Multi-column container base style */
+.columns {
+  /* Common base; test pages will override some props via inline styles or JS */
+  column-gap: 24px;
+  column-fill: balance;
+}
+.columns .span-all {
+  /* Spanning heading */
+  /* Note: If unsupported, this declaration will be ignored gracefully. */
+  column-span: all;
+  -webkit-column-span: all; /* harmless prefix */
+  display: block;
+  background: #fafafa;
+  border: 1px solid #eee;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin: 6px 0 12px 0;
+}
+
+/* Content blocks that should not break across columns */
+.avoid-break {
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* Figures as placeholder images */
+figure {
+  margin: 0 0 12px 0;
+}
+figure .ph {
+  width: 100%;
+  display: block;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  background: #f8f8f8;
+}
+figure figcaption {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+}
+
+/* Headings inside columns */
+h3.section {
+  margin: 10px 0 6px 0;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+/* Explanation area */
+#explain h2 {
+  font-size: 16px;
+  margin: 0 0 8px 0;
+}
+#explain p,
+#explain li {
+  color: #444;
+  font-size: 14px;
+}
+#explain code {
+  background: #f4f4f4;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Utility pills/badges */
+.badge {
+  display: inline-block;
+  font-size: 12px;
+  padding: 2px 6px;
+  border: 1px solid #eee;
+  background: #fafafa;
+  border-radius: 999px;
+  margin-left: 6px;
+  color: #666;
+}
+
+/* Sticky footer of results when needed */
+.results {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px dashed #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #333;
+  background: #fcfcfc;
+}
+
+/* Writing mode demo colorful blocks */
+.grid-block {
+  border-radius: 8px;
+  border: 1px solid #e7e7e7;
+  padding: 8px;
+  margin: 0 0 8px 0;
+  background: #fefefe;
+  /* Keep block intact across columns to verify flow ordering visually */
+  break-inside: avoid;
+}
+.grid-block strong {
+  font-weight: 600;
+}

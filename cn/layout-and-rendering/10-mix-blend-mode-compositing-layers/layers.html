@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>测试用例10：合成层观察</title>
+  <link rel="stylesheet" href="css/shared.css"/>
+</head>
+<body>
+  <header class="header">
+    <div class="inner">
+      <h1>测试用例10：合成层观察</h1>
+      <p>不同 CSS 提示与混合模式组合下的图层边界与合成行为</p>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="toolbar">
+      <div>
+        <label>背景色</label>
+        <input type="color" id="bgColor" value="#007bff"/>
+      </div>
+      <div>
+        <label>覆盖层不透明度</label>
+        <input type="range" id="alpha" min="0.1" max="1" step="0.01" value="0.5"/>
+      </div>
+      <div>
+        <label>混合模式</label>
+        <select id="mode">
+          <option selected>multiply</option>
+          <option>screen</option>
+          <option>overlay</option>
+          <option>difference</option>
+        </select>
+      </div>
+      <div>
+        <label>显示/隐藏</label>
+        <div class="inline">
+          <label class="inline"><input type="checkbox" id="showA" checked/> A</label>
+          <label class="inline"><input type="checkbox" id="showB" checked/> B</label>
+          <label class="inline"><input type="checkbox" id="showC" checked/> C</label>
+          <label class="inline"><input type="checkbox" id="showD" checked/> D</label>
+        </div>
+        <div class="hint">将鼠标悬停在每个盒子上查看具体配置</div>
+      </div>
+      <div>
+        <label>隔离</label>
+        <div class="inline">
+          <input type="checkbox" id="isolate"/>
+          <span class="hint">对整个演示区域应用 <span class="code-like">isolation: isolate</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="layer-grid" id="grid">
+      <div class="layer-box" id="boxA" title="A: mix-blend-mode + 无额外提示">
+        <div class="label">A</div>
+        <div class="bg" id="bgA"></div>
+        <div class="blend" id="blendA" style="mix-blend-mode: multiply;">A</div>
+      </div>
+      <div class="layer-box" id="boxB" title="B: mix-blend-mode + transform: translateZ(0)">
+        <div class="label">B</div>
+        <div class="bg" id="bgB"></div>
+        <div class="blend" id="blendB" style="mix-blend-mode: multiply; transform: translateZ(0);">B</div>
+      </div>
+      <div class="layer-box" id="boxC" title="C: mix-blend-mode + will-change: opacity">
+        <div class="label">C</div>
+        <div class="bg" id="bgC"></div>
+        <div class="blend" id="blendC" style="mix-blend-mode: multiply; will-change: opacity;">C</div>
+      </div>
+      <div class="layer-box" id="boxD" title="D: mix-blend-mode + filter: blur(1px)">
+        <div class="label">D</div>
+        <div class="bg" id="bgD"></div>
+        <div class="blend" id="blendD" style="mix-blend-mode: multiply; filter: blur(1px);">D</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="explain">
+      <h3>如何观察图层</h3>
+      <ol>
+        <li>打开 DevTools → <em>Rendering</em> 面板 → 勾选 <strong>Layer borders</strong>。</li>
+        <li>此页中 A/B/C/D 四个例子分别叠加不同的 CSS 提示：<span class="code-like">transform</span>、<span class="code-like">will-change</span>、<span class="code-like">filter</span>。将鼠标悬停查看配置说明。</li>
+        <li>勾选“隔离”可观察在隔离上下文中，混合元素如何与背景分离。</li>
+        <li>在合成层边界显示时，若某个混合元素被提升为独立合成层，其边框通常会出现不同颜色的描边（以 Chromium DevTools 的标识为准）。</li>
+      </ol>
+    </div>
+  </section>
+
+  <script>
+    const grid = document.getElementById('grid');
+    const bgColor = document.getElementById('bgColor');
+    const alpha = document.getElementById('alpha');
+    const mode = document.getElementById('mode');
+    const isolate = document.getElementById('isolate');
+    const showA = document.getElementById('showA');
+    const showB = document.getElementById('showB');
+    const showC = document.getElementById('showC');
+    const showD = document.getElementById('showD');
+
+    const boxes = ['A','B','C','D'];
+    function apply() {
+      grid.style.isolation = isolate.checked ? 'isolate' : 'auto';
+      boxes.forEach(id => {
+        const bg = document.getElementById('bg'+id);
+        const blend = document.getElementById('blend'+id);
+        bg.style.background = bgColor.value;
+        blend.style.mixBlendMode = mode.value;
+        let a = +alpha.value;
+        blend.style.background = `rgba(255,0,0,${a})`;
+      });
+      document.getElementById('boxA').style.display = showA.checked ? 'block' : 'none';
+      document.getElementById('boxB').style.display = showB.checked ? 'block' : 'none';
+      document.getElementById('boxC').style.display = showC.checked ? 'block' : 'none';
+      document.getElementById('boxD').style.display = showD.checked ? 'block' : 'none';
+    }
+    [bgColor, alpha, mode, isolate, showA, showB, showC, showD].forEach(el=>{
+      el.addEventListener('input', apply);
+      el.addEventListener('change', apply);
+    });
+    apply();
+  </script>
+</body>
+</html>

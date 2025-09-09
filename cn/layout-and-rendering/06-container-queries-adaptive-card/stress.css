@@ -1,0 +1,12 @@
+/* Stress-test page grid layout */
+.test-area.stress{ display:block; }
+.grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.cq-container.mini{ padding: 8px; }
+.cq-container.mini .cq-card{ padding: 8px; gap: 8px; }
+.cq-container.mini .cq-card .media figcaption{ display:none; }
+.cq-container.mini .size-badge{ top:6px; right:6px; }

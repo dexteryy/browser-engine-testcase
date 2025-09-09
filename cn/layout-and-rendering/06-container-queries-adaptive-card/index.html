@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>测试用例 6：容器查询（Container Queries）自适应组件</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="component-card.css">
+  <style id="cqDynamic"><!-- dynamic container query threshold will be injected by JS --></style>
+</head>
+<body data-page="index">
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="wrap">
+      <h1>测试用例 6：容器查询（Container Queries）自适应组件</h1>
+      <p class="subtitle">验证组件根据<strong>父容器</strong>尺寸自适应布局，独立于视口媒体查询。</p>
+    </div>
+  </header>
+
+  <!-- Toolbar -->
+  <section class="toolbar">
+    <div class="wrap">
+      <form id="controls" class="controls" onsubmit="return false;">
+        <div class="group">
+          <label for="threshold">容器阈值（px）</label>
+          <input id="threshold" type="range" min="280" max="640" step="10" value="400" />
+          <output id="thresholdOut" for="threshold">400</output>
+        </div>
+        <div class="group">
+          <label for="widthA">主内容区宽度（px）</label>
+          <input id="widthA" type="range" min="300" max="1000" step="10" value="780" />
+          <output id="widthAOut" for="widthA">780</output>
+        </div>
+        <div class="group">
+          <label for="widthB">侧栏宽度（px）</label>
+          <input id="widthB" type="range" min="240" max="520" step="10" value="320" />
+          <output id="widthBOut" for="widthB">320</output>
+        </div>
+        <div class="group">
+          <label><input id="showSize" type="checkbox" checked> 显示容器尺寸</label>
+        </div>
+        <div class="group">
+          <label><input id="mqDebug" type="checkbox"> 媒体查询对比（≥900px 视口变色）</label>
+        </div>
+        <div class="group">
+          <button id="resetBtn" type="button">重置</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Test Area -->
+  <main class="wrap">
+    <section class="test-area">
+      <div class="panel">
+        <h2>主内容区（宽容器）</h2>
+        <!-- The container below is the size container for the card. -->
+        <div id="containerA" class="cq-container" data-name="card" style="width: 780px;">
+          <div class="size-badge" aria-hidden="true"></div>
+          <article class="cq-card">
+            <figure class="media">
+              <!-- Inline SVG placeholder (kept local and deterministic) -->
+              <svg viewBox="0 0 400 300" role="img" aria-label="示例图片">
+                <defs>
+                  <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#cde9ff"/><stop offset="1" stop-color="#e5f4ff"/>
+                  </linearGradient>
+                </defs>
+                <rect width="400" height="300" fill="url(#g)"/>
+                <g fill="#3a7bd5">
+                  <circle cx="90" cy="140" r="36"/><circle cx="210" cy="120" r="28"/><circle cx="310" cy="180" r="40"/>
+                </g>
+              </svg>
+              <figcaption>示例图片</figcaption>
+            </figure>
+            <div class="body">
+              <h3>自适应卡片组件</h3>
+              <p>当容器宽度达到阈值时，卡片改为左右并排布局；否则为上下堆叠布局。字体大小使用 cqw 单位，随容器宽度而变化。</p>
+              <ul class="meta">
+                <li>标签：容器查询</li>
+                <li>作者：测试工程</li>
+                <li>时间：2025-09-09</li>
+              </ul>
+              <button class="action">操作按钮</button>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>侧栏（窄容器）</h2>
+        <!-- Another independent size container; same component behaves differently here. -->
+        <div id="containerB" class="cq-container" data-name="card" style="width: 320px;">
+          <div class="size-badge" aria-hidden="true"></div>
+          <article class="cq-card">
+            <figure class="media">
+              <svg viewBox="0 0 400 300" role="img" aria-label="示例图片">
+                <defs>
+                  <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#ffe2cc"/><stop offset="1" stop-color="#fff1e6"/>
+                  </linearGradient>
+                </defs>
+                <rect width="400" height="300" fill="url(#g2)"/>
+                <g fill="#ff8c42">
+                  <rect x="70" y="120" width="60" height="60" rx="8"/>
+                  <rect x="180" y="90" width="50" height="50" rx="8"/>
+                  <rect x="270" y="150" width="70" height="70" rx="10"/>
+                </g>
+              </svg>
+              <figcaption>示例图片</figcaption>
+            </figure>
+            <div class="body">
+              <h3>自适应卡片组件</h3>
+              <p>本组件仅根据最近命名为 <code>card</code> 的容器尺寸切换样式，不依赖视口媒体查询。</p>
+              <ul class="meta">
+                <li>标签：容器查询</li>
+                <li>作者：测试工程</li>
+                <li>时间：2025-09-09</li>
+              </ul>
+              <button class="action">操作按钮</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Explanation -->
+    <section class="explain">
+      <h2>解释说明</h2>
+      <ol>
+        <li><strong>测试目标：</strong>验证 Chrome 对 <em>CSS 容器查询</em> 的支持；组件根据其父容器尺寸自适应布局；多个容器在同一视口下互不干扰。</li>
+        <li><strong>测试方案：</strong>页面包含两个相同组件，分别置于大小不同的容器中。容器设置 <code>container-type: inline-size</code> 与 <code>container-name: card</code>；组件内部使用 <code>@container card (width &gt;= 阈值)</code> 切换布局（默认阈值 400px）。</li>
+        <li><strong>使用方法：</strong>
+          <ul>
+            <li>直接观察：宽容器中卡片应为左右并排，窄容器中为上下堆叠。</li>
+            <li>拖动滑块或拖拽容器右下角（支持水平缩放），跨过阈值时布局应即时切换。</li>
+            <li>勾选“媒体查询对比”，当视口 ≥ 900px 时卡片边框变色；注意组件布局仍由容器决定，体现与媒体查询的独立性。</li>
+          </ul>
+        </li>
+        <li><strong>结果评估：</strong>打开 DevTools → Elements，查看容器的 <code>container-name</code> 和实际尺寸；在 Styles 面板确认 <code>@container</code> 规则是否被应用。使用 Performance 录制拖动过程，观察样式计算主要局部发生，无明显卡顿。</li>
+      </ol>
+      <p class="footnote">页面内容文字均为示例；为保证可重复性，图片使用内联 SVG。</p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

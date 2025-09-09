@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>测试用例 6（扩展）：命名嵌套容器与就近匹配</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="component-card.css">
+  <link rel="stylesheet" href="nested.css">
+  <style id="cqDynamic"></style>
+</head>
+<body data-page="nested">
+  <header class="topbar">
+    <div class="wrap">
+      <h1>测试用例 6（扩展）：命名嵌套容器与就近匹配</h1>
+      <p class="subtitle">演示多个命名容器同时存在时，组件按“最近命名容器”触发对应的 @container 规则。</p>
+    </div>
+  </header>
+
+  <section class="toolbar">
+    <div class="wrap">
+      <form class="controls" onsubmit="return false;">
+        <div class="group">
+          <label for="thresholdN">外层容器阈值（px）</label>
+          <input id="thresholdN" type="range" min="300" max="720" step="10" value="480" />
+          <output id="thresholdNOut" for="thresholdN">480</output>
+        </div>
+        <div class="group">
+          <label for="innerW">内层容器宽度（px）</label>
+          <input id="innerW" type="range" min="220" max="600" step="10" value="360" />
+          <output id="innerWOut" for="innerW">360</output>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <section class="test-area single">
+      <!-- Outer container with a different name -->
+      <div id="outerContainer" class="cq-container outer" style="width: 640px;">
+        <h2>外层容器（container-name: outer）</h2>
+
+        <!-- Inner container with another name; the card should primarily query this nearest container -->
+        <div id="innerContainer" class="cq-container inner" style="width: 360px;">
+          <h3>内层容器（container-name: inner）</h3>
+
+          <article class="cq-card">
+            <figure class="media">
+              <svg viewBox="0 0 400 300" role="img" aria-label="示例图片">
+                <rect width="400" height="300" fill="#ecfeff"/>
+                <path d="M40 240 L130 140 L210 220 L330 80" fill="none" stroke="#06b6d4" stroke-width="12" stroke-linecap="round"/>
+              </svg>
+              <figcaption>示例图片</figcaption>
+            </figure>
+            <div class="body">
+              <h3>就近命名容器优先</h3>
+              <p>该卡片被内层命名容器包裹。即使外层也定义了容器查询，CSS 将优先匹配最近（内层）的命名容器。</p>
+              <ul class="meta">
+                <li>外层阈值控制：元信息显示</li>
+                <li>内层阈值控制：标题字号、按钮可见性</li>
+              </ul>
+              <button class="action" style="display:none">操作按钮（内层宽度达标后显示）</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="explain">
+      <h2>解释说明</h2>
+      <ol>
+        <li><strong>测试目标：</strong>验证在多层命名容器并存时，<code>@container &lt;name&gt;</code> 按就近原则匹配。</li>
+        <li><strong>测试方案：</strong>外层容器命名为 <code>outer</code>，内层容器命名为 <code>inner</code>；通过滑块同时调节外层阈值与内层宽度，观察哪个规则先被触发。</li>
+        <li><strong>结果评估：</strong>当内层宽度达到条件时，按钮出现且标题字号增大；外层达到条件时，卡片布局切换为横向并显示元信息。</li>
+      </ol>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

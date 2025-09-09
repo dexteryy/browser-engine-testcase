@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>测试用例4：垂直书写模式与文本方向 - 目录</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="inner">
+      <h1>测试用例4：垂直书写模式与文本方向</h1>
+      <div class="sub">验证 vertical-rl / vertical-lr 下中英文混排、字符旋转与布局定位</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="toolbar">
+      <div class="group" style="grid-column: span 12;">
+        <h3>说明</h3>
+        <p class="note">本测试用例包含多个独立页面，每个页面专注于一种测试场景。所有页面采用统一的白底样式与操作栏，方便观察、对比与回归测试。</p>
+      </div>
+    </section>
+
+    <section class="test-area">
+      <div class="panel">
+        <h4>页面索引</h4>
+        <ul>
+          <li><a href="./01-basic-vertical.html">01 基础：vertical-rl 与水平对照</a></li>
+          <li><a href="./02-text-orientation.html">02 字符方向：mixed / upright / sideways 对比</a></li>
+          <li><a href="./03-flex-grid-integration.html">03 布局整合：垂直容器与 Flex / Grid 对齐</a></li>
+          <li><a href="./04-punctuation-numerals.html">04 标点与数字：竖排下的位置、合字与括号</a></li>
+        </ul>
+        <p class="note">建议使用最新的 Chromium 进行测试。</p>
+      </div>
+    </section>
+
+    <section class="explain">
+      <h3>如何使用</h3>
+      <ul>
+        <li>进入各页面后，通过工具栏切换 <code>writing-mode</code>、<code>text-orientation</code> 等参数，观察文本方向、字符旋转与换行表现。</li>
+        <li>开启“基线栅格”和“调试轮廓”辅助观察行距和盒模型边界。</li>
+        <li>在布局整合页面中，尝试改变 Flex/Grid 的对齐参数，查看不同书写模式的尺寸计算与对齐关系。</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

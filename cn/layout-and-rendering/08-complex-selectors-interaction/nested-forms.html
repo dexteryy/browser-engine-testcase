@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>测试用例8：复杂选择器与交互状态布局 · 嵌套表单与焦点</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="container headline">
+      <h1>测试用例8：复杂选择器与交互状态布局</h1>
+      <p>子场景：使用 <code>:focus-within</code>、<code>label:has(+ input:focus)</code>、<code>form:has(:invalid)</code> 等选择器验证焦点与校验传播。</p>
+    </div>
+  </header>
+
+  <!-- Toolbar -->
+  <section class="toolbar">
+    <div class="container controls" role="group" aria-label="工具栏">
+      <div class="control">
+        <input id="opt-shadow" type="checkbox">
+        <label for="opt-shadow">容器阴影 <span class="badge">视觉辅助</span></label>
+      </div>
+      <div class="control">
+        <input id="opt-deep" type="checkbox" checked>
+        <label for="opt-deep">启用深层选择器组合</label>
+      </div>
+    </div>
+  </section>
+
+  <!-- Test Area -->
+  <main class="section">
+    <div class="container">
+      <h2>测试区域 · 嵌套表单</h2>
+      <p class="help">在下面的表单中使用 <kbd>Tab</kbd>，观察父级 <code>.row</code> 的 <code>:focus-within</code> 高亮；无效输入会触发 <code>.form:has(:invalid)</code> 改变边框。</p>
+
+      <form class="form" action="#" novalidate>
+        <div class="row">
+          <label for="nf-name">姓名（必填）</label>
+          <input id="nf-name" type="text" required placeholder="例如：张三">
+        </div>
+        <div class="row">
+          <label for="nf-mail">邮箱（必填）</label>
+          <input id="nf-mail" type="email" required placeholder="demo@example.com">
+        </div>
+        <div class="row">
+          <label for="nf-pass">密码（至少 6 位）</label>
+          <input id="nf-pass" type="password" minlength="6" placeholder="••••••">
+        </div>
+        <div class="row">
+          <label for="nf-tel">电话（123-456-7890 格式）</label>
+          <input id="nf-tel" type="tel" pattern="\\d{3}-\\d{3}-\\d{4}" placeholder="123-456-7890">
+        </div>
+        <div class="row">
+          <label for="nf-city">城市</label>
+          <input id="nf-city" type="text" placeholder="在此处试试焦点">
+        </div>
+      </form>
+
+      <h2 style="margin-top:24px;">附加列表 · 结构性伪类验证</h2>
+      <ul class="sample-list">
+        <li>
+          <span class="title">项目 1（无徽章）</span>
+          <span class="meta">普通</span>
+        </li>
+        <li>
+          <span class="title">项目 2 <span class="badge">有徽章</span></span>
+          <span class="meta"><strong>标记</strong></span>
+        </li>
+        <li>
+          <span class="title">项目 3（无徽章）</span>
+          <span class="meta">普通</span>
+        </li>
+        <li>
+          <span class="title">项目 4（无徽章）</span>
+          <span class="meta"><strong>标记</strong></span>
+        </li>
+      </ul>
+      <p class="help">启用工具栏的「深层选择器组合」后，验证 <code>:not(:has(.badge))</code> 等组合样式。</p>
+    </div>
+  </main>
+
+  <!-- Explanation -->
+  <section class="section">
+    <div class="container explain">
+      <h2>解释说明</h2>
+      <p><strong>测试目标：</strong>验证焦点从控件传播至容器（<code>:focus-within</code>）、标签对相邻输入的前瞻（<code>label:has(+ input:focus)</code>），以及表单无效状态的祖先级反馈（<code>form:has(:invalid)</code>）。</p>
+      <p><strong>评估方法：</strong></p>
+      <ol class="steps">
+        <li>使用键盘 <kbd>Tab</kbd> 在各输入框间移动，观察所在 <code>.row</code> 高亮。</li>
+        <li>留空必填字段或输入不合规格式，确认外层 <code>.form</code> 边框变为红色。</li>
+        <li>移动鼠标悬停列表奇数项标题，观察后缀与样式变化（当开启深层规则）。</li>
+      </ol>
+      <p class="help">返回：<a href="index.html">主场景</a> · <a href="performance-load.html">性能压力</a></p>
+    </div>
+  </section>
+</body>
+</html>

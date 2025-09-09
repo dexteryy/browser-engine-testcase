@@ -1,0 +1,233 @@
+/* 
+  Test Case 05: Media Queries Responsive Layout
+  - Only native HTML/CSS/JS (no frameworks).
+  - Responsive behavior is implemented with pure CSS @media rules.
+  - JavaScript is used for status display and PerformanceObserver only, not for layout.
+*/
+
+/* ---------- Base / Reset ---------- */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+html { 
+  /* Larger base font on narrow screens per test requirement */
+  font-size: 18px; 
+}
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #1f2937; /* gray-800 */
+  background: #fff; /* white background per unified style */
+  line-height: 1.6;
+}
+
+/* Shared container width (except topbar is full width) */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* ---------- Topbar ---------- */
+.topbar {
+  position: relative;
+  width: 100%;
+  background: #0ea5e9; /* sky-500 */
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,.25);
+}
+.topbar .container {
+  padding: 20px 16px;
+}
+.topbar h1 { margin: 0 0 6px 0; font-size: 20px; }
+.topbar .subtitle { margin: 0; opacity: 0.9; font-size: 14px; }
+
+/* ---------- Toolbar ---------- */
+.toolbar { padding: 16px 0; }
+.controls {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+.group > strong {
+  display: inline-block;
+  min-width: 56px;
+  font-size: 14px;
+  color: #0f172a; /* slate-900 */
+}
+.status { display: flex; flex-wrap: wrap; gap: 12px; font-variant-numeric: tabular-nums; }
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+.btn {
+  display: inline-block;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.btn:hover { background: #eef2ff; }
+
+.css-bp-indicator [data-bp] { display: none; }
+
+/* Pure CSS breakpoint indicators */
+@media (max-width: 799.98px) {
+  .css-bp-indicator [data-bp="mobile"] { display: inline; }
+}
+@media (min-width: 800px) and (max-width: 1199.98px) {
+  .css-bp-indicator [data-bp="tablet"] { display: inline; }
+}
+@media (min-width: 1200px) {
+  .css-bp-indicator [data-bp="desktop"] { display: inline; }
+}
+
+/* Debug overlay using :has() (Chrome supports) */
+main:has(#toggle-outline:checked) .test-area * {
+  outline: 1px dashed rgba(14,165,233,.6);
+  outline-offset: -1px;
+}
+
+/* ---------- Test Area ---------- */
+.test-area {
+  padding: 12px 0 24px 0;
+}
+.site-nav {
+  margin: 8px 0 16px 0;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 12px;
+}
+.site-nav .toggle-label {
+  display: inline-block;
+  cursor: pointer;
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+  margin-bottom: 8px;
+  user-select: none;
+}
+/* Visually hide the real checkbox, keep it focusable for a11y */
+.nav-toggle {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Navigation menu - mobile first (vertical, collapsible) */
+.menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: none; /* collapsed by default on mobile */
+}
+.nav-toggle:checked ~ .menu { display: block; }
+.menu li { border-top: 1px dashed #e2e8f0; }
+.menu li:first-child { border-top: none; }
+.menu a {
+  display: block;
+  padding: 10px 8px;
+  text-decoration: none;
+  color: #0f172a;
+}
+.menu a:hover { background: #e2e8f0; }
+
+/* Layout wrapper - mobile first: single column, sidebar hidden */
+.layout {
+  display: block; /* change across breakpoints to grid */
+}
+.sidebar {
+  display: none; /* hidden on narrow screens */
+  margin-top: 16px;
+}
+.sidebar .widget {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff;
+  margin-bottom: 12px;
+}
+
+/* Content area */
+.content h2 { margin: 0 0 8px 0; }
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* 1 column on mobile */
+  gap: 12px;
+}
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  padding: 12px;
+}
+.card h3 { margin: 8px 0; }
+.card .media {
+  /* Placeholder media block with fixed aspect ratio to reduce CLS */
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  border-radius: 8px;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(14,165,233,.15) 0 12px,
+    rgba(14,165,233,.25) 12px 24px
+  );
+  border: 1px solid #bae6fd;
+  margin-bottom: 8px;
+}
+
+/* Hide certain menu item on small screens to test visibility */
+.hide-on-mobile { display: none; }
+
+/* ---------- Tablet (>= 800px) ---------- */
+@media (min-width: 800px) {
+  html { font-size: 16px; } /* Slightly smaller base font on wider screens */
+  .controls { grid-template-columns: 1fr 1fr 1fr; }
+  .site-nav .toggle-label { display: none; } /* hamburger hidden */
+  .menu { 
+    display: flex;            /* switch display type */
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    border-top: none;
+  }
+  .menu li { border: none; }
+  .menu a { padding: 6px 10px; }
+  .hide-on-mobile { display: list-item; }
+
+  /* Switch to two-column layout using CSS Grid */
+  .layout {
+    display: grid; /* display change from block -> grid */
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 16px;
+    align-items: start;
+  }
+  .sidebar { display: block; }
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Desktop (>= 1200px) ---------- */
+@media (min-width: 1200px) {
+  .site-nav { padding: 14px; }
+  .menu { gap: 14px 18px; }
+  .layout { gap: 24px; }
+  .card-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .card { padding: 14px; }
+  .sidebar .widget { padding: 14px; }
+  .widget-desktop-only { display: block; }
+}
+
+/* Default hidden blocks for other ranges */
+.widget-desktop-only { display: none; }
+
+/* ---------- Explain ---------- */
+.explain { padding-bottom: 48px; }
+.explain h2 { margin: 8px 0 8px; }
+.explain h3 { margin: 18px 0 8px; }
+.explain ul, .explain ol { padding-left: 1.2em; }
+.explain code { background: #f1f5f9; padding: 1px 4px; border-radius: 4px; }

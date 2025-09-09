@@ -1,0 +1,406 @@
+/* 
+  styles.css — shared UI for Test Case 8
+  Notes:
+  - All comments in English as required.
+  - Page copy is in Chinese.
+  - Target runtime: latest Chromium.
+*/
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root{
+  --maxw: 1100px;
+  --radius: 10px;
+  --gap: 16px;
+  --accent: #0b6dff;         /* Accent color for focus/outline */
+  --accent-ink: #0b3a86;
+  --border: #e6e8eb;
+  --text: #1f2328;
+  --muted: #6a737d;
+  --bg-soft: #f6f8fa;
+  --code: #0b6dff;
+  --shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.08);
+  --shadow-strong: 0 2px 6px rgba(0,0,0,.08), 0 16px 48px rgba(0,0,0,.12);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: ui-sans-serif, system-ui, "Segoe UI", "PingFang SC", "Noto Sans SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+  color: var(--text);
+  background: #fff; /* White background per requirement */
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.container {
+  width: min(100%, var(--maxw));
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Topbar */
+.topbar {
+  width: 100%;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  position: sticky; /* Aid testing while scrolling */
+  top: 0;
+  z-index: 10;
+}
+
+.topbar .headline {
+  padding: 18px 0 12px;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: .02em;
+}
+
+.topbar p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Toolbar */
+.toolbar {
+  background: var(--bg-soft);
+  border-bottom: 1px solid var(--border);
+}
+
+.toolbar .controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  padding: 12px 0;
+  align-items: center;
+}
+
+.control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  user-select: none;
+}
+
+.control input[type="checkbox"],
+.control input[type="radio"] {
+  /* Make inputs visible (we test focus styles), but subtle */
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  background: #eef2ff;
+  color: var(--accent-ink);
+  border-radius: 999px;
+  border: 1px solid #dbe3ff;
+}
+
+/* Section shells */
+.section {
+  padding: 22px 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.section:last-child {
+  border-bottom: none;
+}
+
+.section h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.help {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Utilities */
+.visually-hidden {
+  /* Keep element accessible but not visible; used for demo in some places */
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap; border: 0;
+}
+
+kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  border: 1px solid var(--border);
+  padding: 0 .38em;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 1px 0 rgba(0,0,0,.04);
+  font-size: .95em;
+}
+
+/* Cards used across pages */
+.cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gap);
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.03);
+  overflow: clip;
+}
+
+.card .head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.card .title {
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+
+.card .actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggle-btn {
+  /* This label acts like a button */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.toggle-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Demonstrate forward-looking :has(): style label when its adjacent input is checked */
+.toggle-btn:has(+ input[type="checkbox"]:checked) {
+  background: #eef7ff;
+  border-color: #b6d7ff;
+  color: var(--accent-ink);
+}
+
+/* Core interaction: the card becomes "open" when its internal .toggle is checked */
+.card .details {
+  display: none;
+  padding: 14px;
+}
+
+.card:has(.toggle:checked) .details {
+  display: block; /* Critical test: :has() controlling descendants */
+  background: #fcfdff;
+}
+
+/* Focus handling: highlight card when any inner element has focus */
+.card:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Optional card shadow toggle: uses a toolbar checkbox located elsewhere in the DOM */
+body:has(#opt-shadow:checked) .card {
+  box-shadow: var(--shadow);
+}
+
+/* Optional multi-column layout triggered from toolbar */
+@media (min-width: 900px) {
+  body:has(#opt-columns-2:checked) .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  body:has(#opt-columns-3:checked) .cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Sample list for deep selector tests */
+.sample-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: clip;
+}
+
+.sample-list > li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.sample-list > li:last-child { border-bottom: none; }
+
+.sample-list .title {
+  font-size: 14px;
+}
+
+.sample-list .meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* 1) nth-child + hover + descendant ::after */
+body:has(#opt-deep:checked) .sample-list > li:nth-child(odd):hover > .title::after {
+  content: "（奇数项 hover 命中）";
+  margin-left: 6px;
+  font-weight: 600;
+  color: var(--accent-ink);
+}
+
+/* 2) :not() combination — underline titles that DO NOT have a .badge descendent */
+body:has(#opt-deep:checked) .sample-list > li:not(:has(.badge)) > .title {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+/* 3) Adjacent-sibling + :has() — color a title if its following .meta contains strong text */
+body:has(#opt-deep:checked) .sample-list > li > .title:has(+ .meta strong) {
+  color: #1f5bcc;
+}
+
+/* 4) Attribute selector + :focus */
+input[type="text"]:focus {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  outline: none;
+}
+
+/* Form rows for nested-forms page */
+.form {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: 16px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.row:last-child { border-bottom: none; }
+
+/* focus-within container highlight */
+.row:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  background: #f8fbff;
+}
+
+/* Label that looks ahead to its input using :has(+ input:focus) */
+.row label:has(+ input:focus) {
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+/* Entire form border turns red when any field is invalid using :has(input:invalid) */
+.form:has(:is(input, textarea):invalid) {
+  border-color: #e11;
+  box-shadow: 0 0 0 2px rgba(238,17,17,.08) inset;
+}
+
+/* Performance page grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: var(--gap);
+}
+
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  body:has(#perf-cols-3:checked) .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  body:has(#perf-cols-4:checked) .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Stress-mode: add multiple layered selectors that react to toggle state.
+   This is artificial pressure to make style recalculation visible in DevTools.
+*/
+body:has(#perf-stress:checked) .item:nth-child(3n+1):has(.toggle:checked) .title::after { content: " ✓"; color: #1a7f37; }
+body:has(#perf-stress:checked) .item:nth-child(4n+2):not(:has(.toggle:checked)) .title::after { content: " ·"; color: #aaa; }
+body:has(#perf-stress:checked) .item:nth-child(6n):has(.toggle:checked) .meta { color: #1f5bcc; font-weight: 600; }
+body:has(#perf-stress:checked) .item:nth-child(8n+3) .details:has(> .note) { background: #fcfffa; }
+body:has(#perf-stress:checked) .item:has(.form-mini input:focus) { outline: 2px solid #eac54f; outline-offset: 2px; }
+
+/* Small form inside cards for keyboard tests */
+.form-mini {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+.form-mini input[type="text"] {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* Optional shadows on big grids */
+body:has(#perf-shadow:checked) .item {
+  box-shadow: var(--shadow-strong);
+}
+
+/* Explanation block */
+.explain {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+ol.steps {
+  margin: 0;
+  padding-left: 18px;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  background: #f6f8fa;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}

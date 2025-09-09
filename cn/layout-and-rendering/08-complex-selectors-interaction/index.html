@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>测试用例8：复杂选择器与交互状态布局 · 主场景</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="container headline">
+      <h1>测试用例8：复杂选择器与交互状态布局</h1>
+      <p>评估 Chrome 对 <code>:has()</code>、<code>:focus-within</code> 等复杂选择器在交互下的支持与性能。</p>
+    </div>
+  </header>
+
+  <!-- Toolbar -->
+  <section class="toolbar">
+    <div class="container controls" role="group" aria-label="工具栏">
+      <div class="control">
+        <input id="opt-shadow" type="checkbox">
+        <label for="opt-shadow">卡片阴影 <span class="badge">视觉辅助</span></label>
+      </div>
+      <div class="control">
+        <input id="opt-columns-2" name="cols" type="radio">
+        <label for="opt-columns-2">两列布局</label>
+      </div>
+      <div class="control">
+        <input id="opt-columns-3" name="cols" type="radio">
+        <label for="opt-columns-3">三列布局</label>
+      </div>
+      <div class="control">
+        <input id="opt-deep" type="checkbox" checked>
+        <label for="opt-deep">启用深层选择器组合</label>
+      </div>
+      <div class="help">提示：以上选项通过 <code>body:has(#id:checked)</code> 在纯 CSS 中全局生效。</div>
+    </div>
+  </section>
+
+  <!-- Test Area -->
+  <main class="section">
+    <div class="container">
+      <h2>测试区域 · 可交互卡片列表（纯 CSS 折叠）</h2>
+      <p class="help">点击每张卡片右上角的“展开详情”，或使用 <kbd>Tab</kbd> 切换焦点、<kbd>Space</kbd>/<kbd>Enter</kbd> 触发展开。验证 <code>.card:has(.toggle:checked)</code> 与 <code>.card:focus-within</code> 是否正确。</p>
+
+      <div class="cards">
+        <!-- Card 1 -->
+        <article class="card" tabindex="-1">
+          <div class="head">
+            <div class="title">卡片 A · 基础交互</div>
+            <div class="actions">
+              <label class="toggle-btn" for="ck-a">展开详情</label>
+              <input id="ck-a" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p>当该卡片内的复选框被选中时，父节点 <code>.card</code> 满足 <code>:has(.toggle:checked)</code>，从而显示此区域。</p>
+            <div class="form-mini">
+              <input type="text" placeholder="这里试试键盘焦点（测试 :focus-within）" required>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 2 -->
+        <article class="card" tabindex="-1">
+          <div class="head">
+            <div class="title">卡片 B · 标签前瞻 :has(+ …)</div>
+            <div class="actions">
+              <label class="toggle-btn" for="ck-b">展开详情</label>
+              <input id="ck-b" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p>按钮标签位于复选框之前，使用 <code>label.toggle-btn:has(+ input:checked)</code> 选择器正向查看相邻兄弟状态，改变标签外观。</p>
+            <div class="form-mini">
+              <input type="text" placeholder="在此输入（高亮所在卡片容器）">
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 3 -->
+        <article class="card" tabindex="-1">
+          <div class="head">
+            <div class="title">卡片 C · 表单校验 :invalid</div>
+            <div class="actions">
+              <label class="toggle-btn" for="ck-c">展开详情</label>
+              <input id="ck-c" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <form class="form" action="#" novalidate>
+              <div class="row">
+                <label for="email">邮箱</label>
+                <input id="email" type="email" placeholder="e.g. demo@example.com" required>
+              </div>
+              <div class="row">
+                <label for="tel">电话</label>
+                <input id="tel" type="tel" pattern="\\d{3}-\\d{3}-\\d{4}" placeholder="123-456-7890">
+              </div>
+              <div class="row">
+                <label for="name">姓名</label>
+                <input id="name" type="text" required placeholder="必填，试试空提交">
+              </div>
+              <p class="help">当任一字段无效时，使用 <code>.form:has(:invalid)</code> 改变表单边框。</p>
+            </form>
+          </div>
+        </article>
+
+        <!-- Card 4 -->
+        <article class="card" tabindex="-1">
+          <div class="head">
+            <div class="title">卡片 D · 多段内容</div>
+            <div class="actions">
+              <label class="toggle-btn" for="ck-d">展开详情</label>
+              <input id="ck-d" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p>用于观察布局在展开/收起时的重排情况。</p>
+            <ul class="sample-list">
+              <li>
+                <span class="title">列表项 1</span>
+                <span class="meta"><strong>元信息</strong></span>
+              </li>
+              <li>
+                <span class="title">列表项 2</span>
+                <span class="meta">普通</span>
+              </li>
+              <li>
+                <span class="title">列表项 3 <span class="badge">有徽章</span></span>
+                <span class="meta">普通</span>
+              </li>
+              <li>
+                <span class="title">列表项 4</span>
+                <span class="meta"><strong>高亮</strong></span>
+              </li>
+              <li>
+                <span class="title">列表项 5</span>
+                <span class="meta">普通</span>
+              </li>
+            </ul>
+            <p class="help">勾选「启用深层选择器组合」后，验证 <code>:nth-child</code>、<code>:not()</code>、<code>::after</code> 等组合是否在悬停/结构变化时正确应用。</p>
+          </div>
+        </article>
+
+        <!-- Card 5 -->
+        <article class="card" tabindex="-1">
+          <div class="head">
+            <div class="title">卡片 E · 可访问性与聚焦</div>
+            <div class="actions">
+              <label class="toggle-btn" for="ck-e">展开详情</label>
+              <input id="ck-e" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p>使用 <kbd>Tab</kbd> 将焦点移入本卡片内任意元素，观察父容器的 <code>:focus-within</code> 高亮边框。</p>
+            <div class="form-mini">
+              <input type="text" placeholder="焦点试验 1">
+              <input type="text" placeholder="焦点试验 2">
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 6 -->
+        <article class="card" tabindex="-1">
+          <div class="head">
+            <div class="title">卡片 F · 组合与否定选择</div>
+            <div class="actions">
+              <label class="toggle-btn" for="ck-f">展开详情</label>
+              <input id="ck-f" class="toggle" type="checkbox" />
+            </div>
+          </div>
+          <div class="details">
+            <p>在实际项目中，请谨慎叠加过多关系选择器以避免样式重计算开销。此卡片用于观察运行时开销的主观感受。</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </main>
+
+  <!-- Explanation -->
+  <section class="section">
+    <div class="container explain">
+      <h2>解释说明</h2>
+      <p><strong>测试目标：</strong>验证浏览器对复杂关系选择器（如 <code>:has()</code>、<code>:focus-within</code>、<code>:not()</code>、<code>:nth-child</code>）的解析、匹配与在交互状态下的即时更新。</p>
+      <p><strong>使用方法：</strong></p>
+      <ol class="steps">
+        <li>直接查看静态样式是否正确渲染（如奇数项 hover 后的后缀文本、无徽章项目的下划线风格等）。</li>
+        <li>逐个点击卡片右上角的“展开详情”，确认每次点击后内容即时出现/隐藏，无状态不同步。</li>
+        <li>使用键盘 <kbd>Tab</kbd> 在卡片之间移动焦点，焦点进入某卡片时该容器出现蓝色边框（<code>:focus-within</code>），移出后消失。</li>
+        <li>切换上方工具栏选项，观察通过 <code>body:has(#id:checked)</code> 驱动的全局布局变化是否即时生效。</li>
+      </ol>
+      <p><strong>性能评估：</strong>打开 DevTools → Performance，录制快速展开/收起过程，关注“Recalculate Style”耗时。如发现明显抖动或卡顿，可在「性能压力」页面进行更强对比。</p>
+      <p class="help">相关页面：<a href="nested-forms.html">嵌套表单与焦点</a> · <a href="performance-load.html">性能压力</a></p>
+    </div>
+  </section>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>测试用例10：性能压力与帧率观测</title>
+  <link rel="stylesheet" href="css/shared.css"/>
+  <style>
+    /* Perf page small styles */
+    .legend { font-size: 12px; color: #555; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="inner">
+      <h1>测试用例10：性能压力与帧率观测</h1>
+      <p>大量混合元素、持续动画的情况下，观察帧率与流畅度</p>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="toolbar">
+      <div>
+        <label>元素数量</label>
+        <input type="range" id="count" min="0" max="600" step="1" value="120"/>
+        <div class="hint"><span id="countVal">120</span> 个</div>
+      </div>
+      <div>
+        <label>元素尺寸（px）</label>
+        <input type="range" id="size" min="12" max="120" step="1" value="40"/>
+        <div class="hint"><span id="sizeVal">40</span> px</div>
+      </div>
+      <div>
+        <label>混合模式</label>
+        <select id="mode">
+          <option value="random" selected>随机</option>
+          <option>multiply</option>
+          <option>screen</option>
+          <option>overlay</option>
+          <option>difference</option>
+          <option>exclusion</option>
+          <option>lighten</option>
+          <option>darken</option>
+        </select>
+      </div>
+      <div>
+        <label>颜色透明度</label>
+        <input type="range" id="alpha" min="0.1" max="1" step="0.01" value="0.6"/>
+        <div class="hint">Alpha：<span id="alphaVal">0.60</span></div>
+      </div>
+      <div>
+        <label>动画</label>
+        <div class="inline">
+          <button id="toggle">开始</button>
+          <button id="step">单步帧</button>
+        </div>
+      </div>
+      <div>
+        <label>性能指标</label>
+        <div class="badges">
+          <span class="badge" id="fps">FPS: --</span>
+          <span class="badge" id="minfps">最低: --</span>
+          <span class="badge" id="ms">帧耗时: -- ms</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="stage-wrap">
+      <div class="perf-stage" id="stage"></div>
+      <p class="small-note legend">建议：打开 DevTools Performance 录制滚动或动画，确认在大量混合元素情况下是否出现明显的重绘或掉帧。</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="explain">
+      <h3>测试方法</h3>
+      <ol>
+        <li>调整元素数量与尺寸，点击“开始”观察帧率。</li>
+        <li>将混合模式设为“随机”以模拟复杂场景，或固定为某个模式进行针对性测试。</li>
+        <li>在 DevTools 中勾选 <em>Layer borders</em>，观察是否出现大量独立合成层以及它们的边界。</li>
+      </ol>
+    </div>
+  </section>
+
+  <script>
+    const stage = document.getElementById('stage');
+    const countEl = document.getElementById('count');
+    const sizeEl = document.getElementById('size');
+    const modeEl = document.getElementById('mode');
+    const alphaEl = document.getElementById('alpha');
+    const countVal = document.getElementById('countVal');
+    const sizeVal = document.getElementById('sizeVal');
+    const alphaVal = document.getElementById('alphaVal');
+    const toggleBtn = document.getElementById('toggle');
+    const stepBtn = document.getElementById('step');
+    const fpsBadge = document.getElementById('fps');
+    const minfpsBadge = document.getElementById('minfps');
+    const msBadge = document.getElementById('ms');
+
+    const modes = ['multiply','screen','overlay','difference','exclusion','lighten','darken'];
+    let blobs = [];
+    let running = false;
+    let rafId = 0;
+    let last = performance.now();
+    let fpsHist = [];
+
+    function rand(min, max){ return Math.random()*(max-min)+min; }
+    function randInt(min, max){ return Math.floor(rand(min, max)); }
+    function randHex(){ return '#'+Math.floor(Math.random()*0xffffff).toString(16).padStart(6,'0'); }
+
+    function createBlobs(n) {
+      // remove existing
+      blobs.forEach(b => b.el.remove());
+      blobs = [];
+      const size = +sizeEl.value;
+      const a = +alphaEl.value;
+      for (let i=0;i<n;i++) {
+        const el = document.createElement('div');
+        el.className = 'blob';
+        el.style.width = size + 'px';
+        el.style.height = size + 'px';
+        const color = randHex();
+        el.style.background = color.replace(')', ', '+a+')').replace('#','rgba('); // will fix next line
+        // fix background rgba: convert hex to rgba
+        const r = parseInt(color.substr(1,2),16);
+        const g = parseInt(color.substr(3,2),16);
+        const b = parseInt(color.substr(5,2),16);
+        el.style.background = `rgba(${r},${g},${b},${a})`;
+        const mode = modeEl.value === 'random' ? modes[randInt(0, modes.length)] : modeEl.value;
+        el.style.mixBlendMode = mode;
+        el.textContent = mode[0].toUpperCase();
+        stage.appendChild(el);
+        blobs.push({
+          el,
+          x: rand(0, stage.clientWidth - size),
+          y: rand(0, stage.clientHeight - size),
+          vx: rand(-0.8, 0.8),
+          vy: rand(-0.8, 0.8),
+          rot: rand(0, Math.PI*2),
+          rs: rand(-0.02, 0.02)
+        });
+      }
+    }
+
+    function step(timestamp) {
+      const dt = (timestamp - last);
+      last = timestamp;
+      // FPS metrics
+      const fps = 1000 / dt;
+      fpsHist.push(fps);
+      if (fpsHist.length > 60) fpsHist.shift();
+      const avg = fpsHist.reduce((a,b)=>a+b,0) / fpsHist.length;
+      const minfps = Math.min(...fpsHist);
+
+      // update badges with color coding
+      fpsBadge.textContent = 'FPS: ' + avg.toFixed(1);
+      minfpsBadge.textContent = '最低: ' + minfps.toFixed(1);
+      msBadge.textContent = '帧耗时: ' + dt.toFixed(2) + ' ms';
+      [fpsBadge, minfpsBadge].forEach(b=>{
+        b.classList.remove('good','warn','bad');
+        if (avg >= 55) b.classList.add('good');
+        else if (avg >= 40) b.classList.add('warn');
+        else b.classList.add('bad');
+      });
+
+      const size = +sizeEl.value;
+      // move blobs using transform to avoid layout
+      for (const o of blobs) {
+        o.x += o.vx * (dt/16);
+        o.y += o.vy * (dt/16);
+        if (o.x < -size*0.5 || o.x > stage.clientWidth - size*0.5) o.vx *= -1;
+        if (o.y < -size*0.5 || o.y > stage.clientHeight - size*0.5) o.vy *= -1;
+        o.rot += o.rs;
+        o.el.style.transform = `translate(${o.x}px, ${o.y}px) rotate(${o.rot}rad)`;
+      }
+
+      if (running) rafId = requestAnimationFrame(step);
+    }
+
+    function start() {
+      running = true;
+      last = performance.now();
+      rafId = requestAnimationFrame(step);
+      toggleBtn.textContent = '暂停';
+    }
+    function stop() {
+      running = false;
+      cancelAnimationFrame(rafId);
+      toggleBtn.textContent = '开始';
+    }
+
+    // Bind UI
+    countEl.addEventListener('input', ()=>{
+      countVal.textContent = countEl.value;
+      createBlobs(+countEl.value);
+    });
+    sizeEl.addEventListener('input', ()=>{
+      sizeVal.textContent = sizeEl.value;
+      // update size of existing
+      blobs.forEach(o => {
+        o.el.style.width = sizeEl.value + 'px';
+        o.el.style.height = sizeEl.value + 'px';
+      });
+    });
+    alphaEl.addEventListener('input', ()=>{
+      alphaVal.textContent = (+alphaEl.value).toFixed(2);
+      blobs.forEach(o => {
+        const bg = o.el.style.background;
+        // Recompute rgba alpha by replacing after last comma
+        const parts = bg.match(/rgba\((\d+),(\d+),(\d+),([0-9.]+)\)/);
+        if (parts) {
+          o.el.style.background = `rgba(${parts[1]},${parts[2]},${parts[3]},${(+alphaEl.value).toFixed(2)})`;
+        }
+      });
+    });
+    modeEl.addEventListener('change', ()=>{
+      blobs.forEach(o => {
+        const mode = modeEl.value === 'random' ? modes[Math.floor(Math.random()*modes.length)] : modeEl.value;
+        o.el.style.mixBlendMode = mode;
+        o.el.textContent = mode[0].toUpperCase();
+      });
+    });
+
+    toggleBtn.addEventListener('click', ()=>{
+      running ? stop() : start();
+    });
+    stepBtn.addEventListener('click', ()=>{
+      if (!running) step(performance.now());
+    });
+
+    // Init
+    countVal.textContent = countEl.value;
+    sizeVal.textContent = sizeEl.value;
+    alphaVal.textContent = (+alphaEl.value).toFixed(2);
+    createBlobs(+countEl.value);
+  </script>
+</body>
+</html>

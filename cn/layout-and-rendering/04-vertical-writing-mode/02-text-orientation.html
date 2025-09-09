@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>04-02 字符方向：mixed / upright / sideways 对比</title>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="common.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="inner">
+      <h1>测试用例4-02：字符方向对比</h1>
+      <div class="sub">在三个独立竖排列中对比 mixed / upright / sideways</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="toolbar">
+      <div class="group">
+        <h3>尺寸与排版</h3>
+        <div class="row">
+          <label for="ctrl-fs">字体大小（px）：</label>
+          <input type="range" id="ctrl-fs" min="14" max="28" step="1" value="18" />
+          <label for="ctrl-lh">行高（px）：</label>
+          <input type="range" id="ctrl-lh" min="18" max="40" step="1" value="28" />
+          <label for="ctrl-letter">字间距（px）：</label>
+          <input type="range" id="ctrl-letter" min="-1" max="2" step="0.1" value="0" />
+        </div>
+        <div class="row">
+          <label><input type="checkbox" id="ctrl-baseline" /> 显示基线栅格</label>
+          <label><input type="checkbox" id="ctrl-outline" /> 显示调试轮廓</label>
+        </div>
+      </div>
+      <div class="group">
+        <h3>数字合字（text-combine-upright）</h3>
+        <div class="row">
+          <label><input type="checkbox" id="ctrl-tcu-d2" /> digits 2</label>
+          <label><input type="checkbox" id="ctrl-tcu-all" /> all</label>
+        </div>
+        <div class="row">
+          <label><input type="checkbox" id="ctrl-force-upright" /> 将 .latin 强制直立（span.latin）</label>
+          <label><input type="checkbox" id="ctrl-force-sideways" /> 将 .latin 强制侧向（span.latin）</label>
+        </div>
+      </div>
+      <div class="group" style="grid-column: span 4;">
+        <h3>状态</h3>
+        <div class="meters" id="meters"></div>
+      </div>
+    </section>
+
+    <section class="test-area" id="test-area">
+      <div class="overlay-baseline"></div>
+
+      <div class="test-split">
+        <div class="panel">
+          <h4>mixed（默认）</h4>
+          <div id="vb" class="vertical-box vertical-rl tor-mixed sample">
+            <p>默认 <b>mixed</b>：拉丁字母旋转，东亚字符直立。英文单词 <span class="latin">Chrome</span>、<span class="latin">CSS</span>、<span class="latin">Grid</span> 与数字 <span class="num">2025</span>。</p>
+            <p>示例：竖排中的半角括号 ( ) 与全角括号（ ）的表现；URL 片段 <span class="latin">example.com</span> 仅作文本演示。</p>
+            <p>日文：縦書きで <span class="latin">Web</span> と <span class="latin">UI</span> を混在。<ruby>京都<rt>きょうと</rt></ruby>。</p>
+          </div>
+        </div>
+        <div class="panel">
+          <h4>upright</h4>
+          <div class="vertical-box vertical-rl tor-upright sample">
+            <p>在 <b>upright</b> 下，拉丁字符也直立显示：<span class="latin">Chrome</span> <span class="latin">CSS3</span> <span class="latin">Grid</span> <span class="num">12</span><span class="num">34</span>。</p>
+            <p>观察大小写字母、长单词的直立可读性与行内对齐。</p>
+            <p>日文：たてがき + <span class="latin">upright</span>。韩文：혼합 <span class="latin">upright</span>。</p>
+          </div>
+        </div>
+        <div class="panel">
+          <h4>sideways</h4>
+          <div class="vertical-box vertical-rl tor-sideways sample">
+            <p>在 <b>sideways</b> 下，所有字符侧向显示：<span class="latin">Chrome CSS Grid</span> <span class="num">2025</span>。</p>
+            <p>对比标点旋转、英文单词的连贯性与换行行为。</p>
+            <p>日文：サイドウェイズ。韩文：사이드웨이즈。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="explain">
+      <h3>测试目标</h3>
+      <p>在相同内容下对比三种 <code>text-orientation</code> 的差异，观察字符方向、标点定位与换行。</p>
+      <h4>使用方法</h4>
+      <ul>
+        <li>调节字体、行高与字间距，观察不同字符集在三种模式下的排版变化。</li>
+        <li>勾选数字合字（digits 2 / all）以检查竖排数字的合并表现。</li>
+        <li>对 <code>span.latin</code> 应用强制直立/侧向以验证局部覆盖样式的优先级与渲染。</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', function(){
+      // Use the first column as the "target" for live meters/controls.
+      Test04.wireCommonControls({
+        target: document.getElementById('vb'),
+        meters: document.getElementById('meters')
+      });
+    });
+  </script>
+</body>
+</html>

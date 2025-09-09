@@ -1,0 +1,5 @@
+/* Page-specific helpers for nested containers */
+.test-area.single{ display:block; }
+.cq-container.outer{ container-type: inline-size; container-name: outer; }
+.cq-container.inner{ container-type: inline-size; container-name: inner; margin-top: 8px; }
+.cq-container h2, .cq-container h3{ margin: 4px 0 10px; color:#334155; font-size: 14px; }

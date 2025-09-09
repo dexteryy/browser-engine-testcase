@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>04-01 基础：vertical-rl 与水平对照</title>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="common.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="inner">
+      <h1>测试用例4-01：基础</h1>
+      <div class="sub">vertical-rl / vertical-lr 与普通水平文本的并排对比</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="toolbar">
+      <div class="group">
+        <h3>书写模式</h3>
+        <div class="row">
+          <label for="ctrl-wm">writing-mode：</label>
+          <select id="ctrl-wm">
+            <option value="vertical-rl" selected>vertical-rl（从上到下，列从右到左）</option>
+            <option value="vertical-lr">vertical-lr（从上到下，列从左到右）</option>
+            <option value="horizontal-tb">horizontal-tb（水平参考）</option>
+          </select>
+        </div>
+        <div class="row">
+          <label>text-orientation：</label>
+          <label><input type="radio" name="ctrl-to" value="mixed" checked /> mixed（默认）</label>
+          <label><input type="radio" name="ctrl-to" value="upright" /> upright</label>
+          <label><input type="radio" name="ctrl-to" value="sideways" /> sideways</label>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>尺寸与排版</h3>
+        <div class="row">
+          <label for="ctrl-inline">inline-size（em）：</label>
+          <input type="range" id="ctrl-inline" min="12" max="28" step="1" value="18" />
+          <label for="ctrl-block">block-size（em）：</label>
+          <input type="range" id="ctrl-block" min="18" max="40" step="1" value="28" />
+        </div>
+        <div class="row">
+          <label for="ctrl-fs">字体大小（px）：</label>
+          <input type="range" id="ctrl-fs" min="14" max="28" step="1" value="18" />
+          <label for="ctrl-lh">行高（px）：</label>
+          <input type="range" id="ctrl-lh" min="18" max="40" step="1" value="28" />
+          <label for="ctrl-letter">字间距（px）：</label>
+          <input type="range" id="ctrl-letter" min="-1" max="2" step="0.1" value="0" />
+        </div>
+        <div class="row">
+          <label><input type="checkbox" id="ctrl-baseline" /> 显示基线栅格</label>
+          <label><input type="checkbox" id="ctrl-outline" /> 显示调试轮廓</label>
+        </div>
+      </div>
+
+      <div class="group" style="grid-column: span 4;">
+        <h3>状态</h3>
+        <div class="meters" id="meters"></div>
+      </div>
+    </section>
+
+    <section class="test-area" id="test-area">
+      <div class="overlay-baseline"></div>
+      <div class="test-split">
+        <div class="panel">
+          <h4>垂直书写区域</h4>
+          <div id="vb" class="vertical-box vertical-rl tor-mixed sample">
+            <p>在 <b>vertical-rl</b> 模式下，文字从上到下排列，段落从右向左推进。以下为中英文混排样例：</p>
+            <p>示例：Chrome 对 <span class="latin">CSS Writing Modes Level 3</span> 的支持不断改进，版本 <span class="num">25</span>.0（<span class="num">2025</span> 年）修正了若干竖排问题。</p>
+            <p>标点示例：中文标点——，。、；：？！“”（）【】《》；半角: , . ; : ? ! ( ) [ ] &lt; &gt;。</p>
+            <p>日文：たてがきの検証。カタカナ・ひらがな・漢字。<ruby>東京<rt>とうきょう</rt></ruby>での縦書き。</p>
+            <p>韩文：세로쓰기 테스트입니다. 혼합 텍스트와 숫자 <span class="num">12</span><span class="num">34</span>。</p>
+            <ul>
+              <li>编号 <span class="num">01</span>：混排换行观察。</li>
+              <li>编号 <span class="num">02</span>：标点位置与旋转。</li>
+              <li>编号 <span class="num">03</span>：数字合字（<code>text-combine-upright</code>）。</li>
+            </ul>
+          </div>
+        </div>
+        <div class="panel">
+          <h4>水平参考区域</h4>
+          <div class="hz-box sample">
+            <p>该区域使用普通 <b>horizontal-tb</b> 水平书写，内容与左侧一致，用于视觉对照。</p>
+            <p>示例：Chrome 对 <span class="latin">CSS Writing Modes Level 3</span> 的支持不断改进，版本 25.0（2025 年）修正了若干竖排问题。</p>
+            <p>标点示例：中文标点——，。、；：？！“”（）【】《》；半角: , . ; : ? ! ( ) [ ] &lt; &gt;。</p>
+            <p>日文：たてがきの検証。カタカナ・ひらがな・漢字。<ruby>東京<rt>とうきょう</rt></ruby>での縦書き。</p>
+            <p>韩文：세로쓰기 테스트입니다. 혼합 텍스트와数字 1234。</p>
+            <ul>
+              <li>编号 01：混排换行观察。</li>
+              <li>编号 02：标点位置与旋转。</li>
+              <li>编号 03：数字合字（text-combine-upright）。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="explain">
+      <h3>测试目标</h3>
+      <p>确认垂直书写模式下文本的流向、字符方向与块级排版是否符合预期，并与水平参考进行对照。</p>
+      <h4>使用方法</h4>
+      <ul>
+        <li>切换 <code>writing-mode</code> 为 <code>vertical-rl</code> 或 <code>vertical-lr</code>，观察段落推进方向是否正确。</li>
+        <li>切换 <code>text-orientation</code>：<b>mixed</b>（默认，拉丁旋转）、<b>upright</b>（全部直立）、<b>sideways</b>（全部侧向）。</li>
+        <li>调整字体大小、行高和逻辑尺寸（inline/block），并开启“基线栅格”“调试轮廓”辅助观察。</li>
+        <li>滚动或缩放窗口，验证是否出现错位、重叠或裁剪。</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', function(){
+      Test04.wireCommonControls({
+        target: document.getElementById('vb'),
+        meters: document.getElementById('meters')
+      });
+    });
+  </script>
+</body>
+</html>

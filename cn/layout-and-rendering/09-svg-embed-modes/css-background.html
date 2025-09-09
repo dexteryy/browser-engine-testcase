@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN" id="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>测试用例9：CSS 背景 SVG</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="inner">
+      <h1>测试用例9：SVG 图像嵌入与引用方式</h1>
+      <div class="desc">将 SVG 作为 CSS 背景图像（background-image）</div>
+      <nav class="nav">
+        <a href="./index.html">对比</a>
+        <a href="./inline.html">内联SVG</a>
+        <a href="./external.html">外部引用</a>
+        <a class="active" href="./css-background.html">CSS 背景</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="toolbar">
+      <div class="tool-group" style="grid-column: span 6;">
+        <h3>背景属性</h3>
+        <div class="tool-inline">
+          <label>background-size：</label>
+          <select id="bgSize">
+            <option value="contain" selected>contain</option>
+            <option value="cover">cover</option>
+            <option value="100% auto">100% auto</option>
+            <option value="auto 100%">auto 100%</option>
+            <option value="160px 120px">160px 120px</option>
+          </select>
+          <label>background-position：</label>
+          <select id="bgPos">
+            <option value="center" selected>center</option>
+            <option value="top left">top left</option>
+            <option value="top right">top right</option>
+            <option value="bottom left">bottom left</option>
+            <option value="bottom right">bottom right</option>
+          </select>
+          <label><input type="checkbox" id="repeat"> background-repeat</label>
+        </div>
+      </div>
+      <div class="tool-group" style="grid-column: span 6;">
+        <h3>容器尺寸</h3>
+        <div class="tool-inline">
+          <label>宽(px)：</label><input type="range" id="w" min="160" max="540" value="300"><span id="wVal" class="note">300</span>
+          <label>高(px)：</label><input type="range" id="h" min="120" max="380" value="200"><span id="hVal" class="note">200</span>
+          <label><input type="checkbox" id="outline"> 显示容器轮廓</label>
+          <button id="reset">重置</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="test-area">
+      <div class="bg-target" id="box" aria-label="背景 SVG 测试容器"></div>
+      <div class="note">说明：SVG 仅作为背景图像呈现，<strong>不在 DOM 中</strong>。关注渲染比例、定位与重复是否正确。</div>
+      <div class="code">.bg-target { background-image: url("assets/example.svg"); background-size: <em>contain/cover/…</em>; background-position: center; }</div>
+    </div>
+  </section>
+
+  <section class="section explain">
+    <h2>解释说明</h2>
+    <p><strong>测试目标：</strong>验证将 SVG 作为 CSS 背景时的缩放与定位行为。</p>
+    <p><strong>使用方法：</strong>调整 <code class="code">background-size</code> 与 <code class="code">background-position</code>，切换是否重复；改变容器尺寸观察缩放是否按比例。</p>
+    <p><strong>结果评估：</strong>无论容器尺寸如何变化，图像应保持矢量清晰度，无拉伸畸变；背景图不会参与页面 DOM 选择。</p>
+  </section>
+
+  <footer class="footer">© 测试用例 9 · CSS 背景方式</footer>
+
+  <script>
+    // Simple wiring (English comments)
+    const $ = (s, el=document)=>el.querySelector(s);
+    const box = $("#box");
+    const bgSize = $("#bgSize");
+    const bgPos = $("#bgPos");
+    const repeat = $("#repeat");
+    const w = $("#w"), h = $("#h");
+    const wVal = $("#wVal"), hVal = $("#hVal");
+    const outline = $("#outline");
+    const reset = $("#reset");
+
+    function apply(){
+      box.style.setProperty("--bg-size", bgSize.value);
+      box.style.setProperty("--bg-pos", bgPos.value);
+      box.style.setProperty("--bg-repeat", repeat.checked ? "repeat" : "no-repeat");
+      box.style.setProperty("--box-w", w.value + "px");
+      box.style.setProperty("--box-h", h.value + "px");
+      box.style.setProperty("--show-outline", outline.checked ? "2px" : "0");
+      wVal.textContent = w.value;
+      hVal.textContent = h.value;
+    }
+    [bgSize, bgPos, repeat, w, h, outline].forEach(el=>el.addEventListener("input", apply));
+    reset.addEventListener("click", ()=>{
+      bgSize.value = "contain"; bgPos.value = "center"; repeat.checked = false;
+      w.value = 300; h.value = 200; outline.checked = false; apply();
+    });
+    apply();
+  </script>
+</body>
+</html>

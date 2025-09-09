@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
+  <!-- Colorful SVG composed of gradients and shapes for blend testing -->
+  <defs>
+    <radialGradient id="g1" cx="30%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#ff0066"/>
+    </radialGradient>
+    <radialGradient id="g2" cx="70%" cy="70%" r="60%">
+      <stop offset="0%" stop-color="#00ffff"/>
+      <stop offset="100%" stop-color="#0033ff"/>
+    </radialGradient>
+    <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffff00"/>
+      <stop offset="100%" stop-color="#00ff66"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="800" height="800" fill="url(#g3)"/>
+  <circle cx="260" cy="260" r="220" fill="url(#g1)" opacity="0.9"/>
+  <circle cx="520" cy="520" r="240" fill="url(#g2)" opacity="0.9"/>
+  <g opacity="0.85">
+    <rect x="120" y="520" width="280" height="160" fill="#ffcc00"/>
+    <rect x="400" y="120" width="280" height="160" fill="#00ccff"/>
+  </g>
+  <text x="400" y="780" text-anchor="middle" font-family="Arial, sans-serif" font-size="64" fill="#000000" opacity="0.45">SVG MIX</text>
+</svg>

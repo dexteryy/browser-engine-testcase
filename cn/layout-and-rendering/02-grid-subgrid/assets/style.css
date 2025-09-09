@@ -1,0 +1,229 @@
+
+/* =====================================================
+   Shared UI styles for "测试用例2：Grid网格与Subgrid子网格布局"
+   Notes:
+   - All comments are in English (requirement).
+   - Page content text is in Chinese (requirement).
+   - Design: white background, full-width topbar, unified inner width.
+   - Only modern Chromium is targeted.
+   ===================================================== */
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  color: #1f2328;
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+               Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
+               "Segoe UI Emoji", "Segoe UI Symbol";
+}
+:root {
+  --page-width: 1080px;
+  --gap: 16px;
+  --radius: 10px;
+  --border: #e6e8eb;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --bg-soft: #f8fafc;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  width: 100%;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+}
+.topbar .inner {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 14px 16px;
+}
+.topbar h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+}
+.topbar p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.container {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.tool label {
+  color: #111827;
+}
+.tool .value {
+  min-width: 40px;
+  display: inline-block;
+  text-align: right;
+  color: var(--muted);
+}
+.tool .status {
+  font-weight: 600;
+}
+.btn {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: #fff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.btn:hover { border-color: #d0d5db; }
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.test-area {
+  padding: 16px 0 20px;
+}
+
+.note {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #334155;
+}
+
+.explain {
+  margin: 16px 0 40px;
+  padding: 12px 0 32px;
+  border-top: 1px dashed var(--border);
+}
+.explain h2 {
+  margin: 14px 0 8px;
+  font-size: 16px;
+}
+.explain p, .explain li {
+  color: #374151;
+  font-size: 14px;
+}
+.explain ul { padding-left: 18px; }
+
+/* ---------- Grid playground shared ---------- */
+.grid-root {
+  /* Track list is provided via --cols and/or --rows on each page */
+  display: grid;
+  gap: var(--gap);
+  position: relative; /* required for overlay absolute positioning */
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px;
+  background: #fff;
+}
+
+/* Unified basic visual for grid items */
+.grid-item {
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fafafa;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+.grid-item strong { color: #0f172a; }
+
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  color: #1d4ed8;
+  background: #eef2ff;
+  border: 1px solid #e0e7ff;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+/* ---------- Overlay drawing (host container provides tracks) ---------- */
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* The actual track definitions are set dynamically in JS or inherited via subgrid */
+}
+.grid-overlay .line {
+  position: absolute;
+  z-index: 2;
+}
+.grid-overlay .line.v { width: 0; border-left: 1px dashed rgba(37, 99, 235, .9); height: 100%; }
+.grid-overlay .line.h { height: 0; border-top: 1px dashed rgba(37, 99, 235, .9); width: 100%; }
+
+/* Helper styles for per-page content blocks */
+.panel {
+  border: 1px dashed #d1d5db;
+  background: #fbfdff;
+}
+
+/* ---------- Small navigation to switch pages ---------- */
+.pages {
+  margin: 8px 0 0;
+  font-size: 12px;
+}
+.pages a {
+  color: var(--accent);
+  text-decoration: none;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+.pages a:hover { border-color: var(--border); background: #f8fafc; }
+
+/* ---------- Inputs ---------- */
+input[type="range"] {
+  width: 180px;
+}
+input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------- Table-like helper (for explain sections) ---------- */
+.kv {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 8px 12px;
+  font-size: 13px;
+}
+.kv div:nth-child(odd) { color: #64748b; }
+.kv code {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 0 6px;
+  border-radius: 4px;
+}
+
+/* Sticky toolbar on large screens so it's easy to operate while scrolling */
+@media (min-width: 900px) {
+  .toolbar { position: sticky; top: 52px; background: #fff; z-index: 2; }
+}
+
+/* Minimal print styles */
+@media print {
+  .toolbar, .pages { display: none; }
+  .topbar { position: static; }
+}

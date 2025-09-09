@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>12-4 性能对比与合成层观察</title>
+  <link rel="stylesheet" href="./assets/common.css">
+  <style>
+  .stage{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  .lane{border:1px dashed var(--border);border-radius:10px;padding:10px;min-height:340px;background:#fff;position:relative;overflow:hidden;}
+  .lane h3{margin:0 0 8px 0;}
+  .items{position:relative;width:100%;height:300px;overflow:hidden;}
+  .dot{position:absolute;width:40px;height:40px;border-radius:6px;background:#8b5cf6;}
+  .dot .photo{border-radius:inherit;filter:brightness(1.05) contrast(1.05);}
+  .dot.masked{background:#9ca3af;}
+  .panel{display:flex;gap:12px;flex-wrap:wrap;}
+  .panel .control{min-width:220px;}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="container">
+      <h1 class="title">12-4 性能对比与合成层观察</h1>
+      <p class="desc">对比未遮罩与遮罩元素在动画场景下的帧率；观察遮罩是否触发独立合成层。</p>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="container panel">
+      <div class="control">
+        <label>元素数量</label>
+        <input id="count" type="range" min="4" max="160" value="32"/>
+        <div class="value"><span id="countv">32</span> 个</div>
+      </div>
+      <div class="control">
+        <label>动画类型</label>
+        <select id="animType">
+          <option value="transform">仅 transform（基线）</option>
+          <option value="mask-size">附加 mask-size 变化</option>
+          <option value="mask-position">附加 mask-position 变化</option>
+        </select>
+      </div>
+      <div class="control">
+        <label>合成层提示（启发式）</label>
+        <select id="layerHint">
+          <option value="none">无</option>
+          <option value="will">will-change: transform</option>
+          <option value="gpu">transform: translateZ(0)</option>
+        </select>
+      </div>
+      <button class="btn" id="run">开始 5 秒测试</button>
+      <button class="btn ghost" id="stop">停止</button>
+      <div class="status"><span class="badge">请同时在 DevTools 中观察 “Layer borders”</span></div>
+    </div>
+  </div>
+
+  <div class="section container">
+    <div class="stage">
+      <div class="lane" id="laneA">
+        <h3>未遮罩</h3>
+        <div class="items" id="itemsA"></div>
+      </div>
+      <div class="lane" id="laneB">
+        <h3>已遮罩</h3>
+        <div class="items" id="itemsB"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section container">
+    <table class="metrix">
+      <thead><tr><th>指标</th><th>未遮罩</th><th>已遮罩</th></tr></thead>
+      <tbody>
+        <tr><td>平均帧间隔（ms）</td><td id="avgA">-</td><td id="avgB">-</td></tr>
+        <tr><td>估算 FPS</td><td id="fpsA">-</td><td id="fpsB">-</td></tr>
+        <tr><td>p95 帧间隔（ms）</td><td id="p95A">-</td><td id="p95B">-</td></tr>
+        <tr><td>p99 帧间隔（ms）</td><td id="p99A">-</td><td id="p99B">-</td></tr>
+      </tbody>
+    </table>
+    <p class="footer-note">说明：该结果用于相对比较，不代表绝对性能；不同机器/窗口大小会有差异。观察遮罩是否造成明显额外开销。</p>
+  </div>
+
+  <div class="section container">
+    <div class="explain">
+      <h2>解释说明</h2>
+      <ul class="list">
+        <li><strong>测试目标：</strong>评估遮罩在典型动画（transform/滚动）下的合成与重绘表现。</li>
+        <li><strong>使用方法：</strong>选择元素数量与动画类型，运行 5 秒，并对比两列 FPS。</li>
+        <li><strong>检验方法：</strong>在 DevTools → Rendering 开启 <span class="kbd">Layer borders</span> 与 <span class="kbd">Paint flashing</span>，观察已遮罩列是否被提升为合成层，以及是否出现额外的 paint 闪烁。</li>
+      </ul>
+    </div>
+  </div>
+
+  <script type="module">
+    import {byId, on, FpsMeter, number} from './assets/common.js';
+    const itemsA = byId('itemsA'), itemsB = byId('itemsB');
+    const count = byId('count'), countv = byId('countv');
+    const animType = byId('animType'), layerHint = byId('layerHint');
+    const runBtn = byId('run'), stopBtn = byId('stop');
+
+    const metrics = {
+      avgA: byId('avgA'), fpsA: byId('fpsA'), p95A: byId('p95A'), p99A: byId('p99A'),
+      avgB: byId('avgB'), fpsB: byId('fpsB'), p95B: byId('p95B'), p99B: byId('p99B')
+    };
+
+    let rafId = 0, t0 = 0, running = false;
+    const meterA = new FpsMeter(), meterB = new FpsMeter();
+
+    function makeItems(container, masked){
+      container.innerHTML='';
+      const n = parseInt(count.value,10);
+      for(let i=0;i<n;i++){
+        const d = document.createElement('div');
+        d.className = 'dot' + (masked ? ' masked' : '');
+        d.style.left = (i%8)*12 + 'px';
+        d.style.top = (i%6)*12 + 'px';
+        const ph = document.createElement('div');
+        ph.className = 'photo';
+        d.appendChild(ph);
+        if(masked){
+          // Apply a circular mask scaled to element box
+          d.style.maskImage = "url('./assets/circle.svg')";
+          d.style.maskSize = '100% 100%';
+          d.style.maskPosition = 'center';
+          d.style.maskRepeat = 'no-repeat';
+          d.style.maskMode = 'alpha';
+        }
+        container.appendChild(d);
+      }
+    }
+
+    function applyLayerHint(){
+      const hint = layerHint.value; // none | will | gpu
+      const lanes = [itemsA, itemsB];
+      lanes.forEach(l => {
+        l.style.willChange = '';
+        l.querySelectorAll('.dot').forEach(d=>{
+          d.style.willChange = '';
+          d.style.transform = '';
+        });
+      });
+      if (hint === 'will'){
+        lanes.forEach(l => l.querySelectorAll('.dot').forEach(d => d.style.willChange = 'transform'));
+      } else if (hint === 'gpu'){
+        lanes.forEach(l => l.querySelectorAll('.dot').forEach(d => d.style.transform = 'translateZ(0)'));
+      }
+    }
+
+    function tick(ts){
+      if(!running) return;
+      const dt = ts - t0;
+      const period = 4000; // ms
+      const r = (ts % period) / period; // 0-1
+      const W = itemsA.clientWidth, H = itemsA.clientHeight;
+      const ampX = W - 40, ampY = H - 40;
+      const nodesA = itemsA.querySelectorAll('.dot');
+      const nodesB = itemsB.querySelectorAll('.dot');
+
+      nodesA.forEach((d,i)=>{
+        const f = (i%10)/10 + r;
+        const x = Math.sin((f)*Math.PI*2)*0.5 + 0.5;
+        const y = Math.cos((f)*Math.PI*2)*0.5 + 0.5;
+        d.style.transform = `translate(${x*ampX}px, ${y*ampY}px)`;
+      });
+      nodesB.forEach((d,i)=>{
+        const f = (i%10)/10 + r;
+        const x = Math.cos((f)*Math.PI*2)*0.5 + 0.5;
+        const y = Math.sin((f)*Math.PI*2)*0.5 + 0.5;
+        d.style.transform = `translate(${x*ampX}px, ${y*ampY}px)`;
+        if (animType.value==='mask-size'){
+          const s = 70 + 30*Math.sin((r+i*0.03)*Math.PI*2);
+          d.style.maskSize = `${s}% ${s}%`;
+        } else if (animType.value==='mask-position'){
+          const px = 50 + 40*Math.sin((r+i*0.05)*Math.PI*2);
+          const py = 50 + 40*Math.cos((r+i*0.05)*Math.PI*2);
+          d.style.maskPosition = `${px}% ${py}%`;
+        }
+      });
+
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function reset(){
+      makeItems(itemsA, false);
+      makeItems(itemsB, true);
+      applyLayerHint();
+    }
+
+    function start(){
+      running = true;
+      t0 = performance.now();
+      meterA.start(); meterB.start();
+      rafId = requestAnimationFrame(tick);
+      setTimeout(stop, 5000);
+    }
+    function stop(){
+      if(!running) return;
+      running = false;
+      cancelAnimationFrame(rafId);
+      const a = meterA.stop(), b = meterB.stop();
+      metrics.avgA.textContent = number(a.avg);
+      metrics.fpsA.textContent = number(a.fps);
+      metrics.p95A.textContent = number(a.p95);
+      metrics.p99A.textContent = number(a.p99);
+      metrics.avgB.textContent = number(b.avg);
+      metrics.fpsB.textContent = number(b.fps);
+      metrics.p95B.textContent = number(b.p95);
+      metrics.p99B.textContent = number(b.p99);
+    }
+
+    on(count, 'input', ()=>{countv.textContent = count.value; reset();});
+    [animType, layerHint].forEach(el => on(el, 'change', ()=>{ reset(); }));
+    on(runBtn, 'click', ()=>{ start(); });
+    on(stopBtn, 'click', ()=>{ stop(); });
+
+    // init
+    countv.textContent = count.value; reset();
+  </script>
+</body>
+</html>

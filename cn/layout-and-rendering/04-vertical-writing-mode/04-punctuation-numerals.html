@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>04-04 标点与数字：位置、合字与括号</title>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="common.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="inner">
+      <h1>测试用例4-04：标点与数字</h1>
+      <div class="sub">竖排中文标点位置、半角/全角对照、数字合字与括号旋转</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="toolbar">
+      <div class="group">
+        <h3>书写与字符方向</h3>
+        <div class="row">
+          <label for="ctrl-wm">writing-mode：</label>
+          <select id="ctrl-wm">
+            <option value="vertical-rl" selected>vertical-rl</option>
+            <option value="vertical-lr">vertical-lr</option>
+            <option value="horizontal-tb">horizontal-tb（参考）</option>
+          </select>
+        </div>
+        <div class="row">
+          <label>text-orientation：</label>
+          <label><input type="radio" name="ctrl-to" value="mixed" checked /> mixed</label>
+          <label><input type="radio" name="ctrl-to" value="upright" /> upright</label>
+          <label><input type="radio" name="ctrl-to" value="sideways" /> sideways</label>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>数字与辅助</h3>
+        <div class="row">
+          <label><input type="checkbox" id="ctrl-tcu-d2" /> 数字合字：digits 2</label>
+          <label><input type="checkbox" id="ctrl-tcu-all" /> 数字合字：all</label>
+        </div>
+        <div class="row">
+          <label><input type="checkbox" id="ctrl-baseline" /> 显示基线栅格</label>
+          <label><input type="checkbox" id="ctrl-outline" /> 显示调试轮廓</label>
+        </div>
+        <div class="row">
+          <label for="ctrl-fs">字体大小（px）：</label>
+          <input type="range" id="ctrl-fs" min="14" max="28" step="1" value="18" />
+          <label for="ctrl-lh">行高（px）：</label>
+          <input type="range" id="ctrl-lh" min="18" max="40" step="1" value="28" />
+        </div>
+      </div>
+
+      <div class="group" style="grid-column: span 4;">
+        <h3>状态</h3>
+        <div class="meters" id="meters"></div>
+      </div>
+    </section>
+
+    <section class="test-area">
+      <div class="overlay-baseline"></div>
+      <div class="test-split">
+        <div class="panel">
+          <h4>半角标点混排</h4>
+          <div id="vb" class="vertical-box vertical-rl tor-mixed sample">
+            <p>中文竖排中的半角标点：, . ; : ? ! ( ) [ ] &lt; &gt;，应当随字符方向进行合适的旋转与定位。</p>
+            <p>括号与数字：(<span class="num">2025</span>)，版本 <span class="num">2</span>.<span class="num">0</span>；范围 <span class="num">12</span>–<span class="num">34</span>。</p>
+            <p>英文内嵌：<span class="latin">Chrome CSS Grid</span> —— 仅作文本演示。</p>
+            <p>连续数字：<span class="num">1</span><span class="num">2</span><span class="num">3</span><span class="num">4</span><span class="num">5</span>；尝试启用合字观察形态。</p>
+            <ul>
+              <li>项目 A：“引号”与『书名号』、【括注】。</li>
+              <li>项目 B：百分比 <span class="num">12</span>%、比率 <span class="num">3</span>:<span class="num">2</span>。</li>
+            </ul>
+          </div>
+        </div>
+        <div class="panel">
+          <h4>全角标点对照</h4>
+          <div class="vertical-box vertical-rl tor-mixed sample">
+            <p>中文竖排中的全角标点：， 。 ； ： ？ ！ （ ） 【 】 《 》。</p>
+            <p>括号与数字：（<span class="num">２０２５</span>），版本 <span class="num">２</span>．<span class="num">０</span>；范围 <span class="num">１２</span>–<span class="num">３４</span>。</p>
+            <p>英文内嵌：<span class="latin">Chrome CSS Grid</span> —— 仅作文本演示。</p>
+            <p>连续数字：<span class="num">１２３４５</span>；配合合字进行比较。</p>
+            <ul>
+              <li>项目 A：“引号”与『书名号』、【括注】。</li>
+              <li>项目 B：百分比 <span class="num">１２</span>%、比率 <span class="num">３</span>:<span class="num">２</span>。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="explain">
+      <h3>测试目标</h3>
+      <p>观察竖排下半角/全角标点的定位与旋转；括号、引号和破折号等符号的形态；连续数字与合字设置的交互效果。</p>
+      <h4>使用方法</h4>
+      <ul>
+        <li>切换书写模式与字符方向，确认标点与括号在不同设置下的表现是否正确。</li>
+        <li>启用 <code>text-combine-upright</code>，比较合字前后的数字外观与对齐。</li>
+        <li>调整字体与行高；开启“基线栅格”检查行距与标点落点。</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', function(){
+      Test04.wireCommonControls({
+        target: document.getElementById('vb'),
+        meters: document.getElementById('meters')
+      });
+    });
+  </script>
+</body>
+</html>

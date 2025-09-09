@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>12-1 基础：SVG/图像遮罩裁剪</title>
+  <link rel="stylesheet" href="./assets/common.css">
+  <style>
+  .box .photo{ background-image:url('./assets/avatar.svg'); }
+  .avatar, .ref{position:relative}
+  .avatar.mask-target{background:#cbd5e1;}
+  .bg-choice-pure{ background:#f1f5f9; }
+  .bg-choice-gradient{ background:linear-gradient(135deg, #fda4af, #93c5fd); }
+  .bg-choice-checker{ background:#fff; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="container">
+      <h1 class="title">12-1 基础：SVG/图像遮罩裁剪</h1>
+      <p class="desc">用 mask-image 给元素应用 SVG/图像/渐变遮罩，验证可见区域裁剪与透明的准确性。</p>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="container">
+      <div class="control">
+        <label>遮罩来源</label>
+        <select id="maskSrc">
+          <option value="svg-circle">SVG 圆形</option>
+          <option value="svg-star">SVG 星形</option>
+          <option value="svg-ring">SVG 圆环</option>
+          <option value="svg-soft">SVG 软圆渐变</option>
+          <option value="css-radial">CSS 径向渐变</option>
+          <option value="css-linear">CSS 线性渐变</option>
+          <option value="none">关闭遮罩</option>
+        </select>
+      </div>
+      <div class="control">
+        <label>mask-mode</label>
+        <select id="maskMode">
+          <option value="alpha">alpha（按透明度）</option>
+          <option value="luminance">luminance（按亮度）</option>
+        </select>
+      </div>
+      <div class="control">
+        <label>mask-size</label>
+        <select id="maskSize">
+          <option value="100% 100%">100% 100%</option>
+          <option value="contain">contain</option>
+          <option value="cover">cover</option>
+          <option value="custom">自定义（百分比）</option>
+        </select>
+        <div class="value">W <input id="msw" type="range" min="10" max="200" value="100"> <span id="mswv">100%</span></div>
+        <div class="value">H <input id="msh" type="range" min="10" max="200" value="100"> <span id="mshv">100%</span></div>
+      </div>
+      <div class="control">
+        <label>mask-position（%）</label>
+        <div class="value">X <input id="mpx" type="range" min="0" max="100" value="50"> <span id="mpxv">50%</span></div>
+        <div class="value">Y <input id="mpy" type="range" min="0" max="100" value="50"> <span id="mpyv">50%</span></div>
+      </div>
+      <div class="control">
+        <label>mask-repeat</label>
+        <select id="maskRepeat">
+          <option value="no-repeat">no-repeat</option>
+          <option value="repeat">repeat</option>
+          <option value="repeat-x">repeat-x</option>
+          <option value="repeat-y">repeat-y</option>
+          <option value="round">round</option>
+          <option value="space">space</option>
+        </select>
+      </div>
+      <div class="control">
+        <label>测试背景</label>
+        <select id="bgChoice">
+          <option value="checker">棋盘格（透明可视化）</option>
+          <option value="pure">纯色</option>
+          <option value="gradient">渐变</option>
+        </select>
+      </div>
+      <button class="btn" id="copyCss">复制当前 CSS</button>
+      <div class="status">
+        <span class="badge" id="supportMC">mask-composite: 检测中…</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section container">
+    <div class="grid">
+      <div class="card">
+        <h3>遮罩元素</h3>
+        <div class="box avatar mask-target checker" id="maskedBox">
+          <div class="transparent-backdrop"></div>
+          <div class="photo"></div>
+        </div>
+        <p class="small-note">遮罩外部应完全透明，可透出下方彩条背景；边缘应平滑。</p>
+      </div>
+      <div class="card">
+        <h3>参考元素（无遮罩）</h3>
+        <div class="box ref checker" id="refBox">
+          <div class="transparent-backdrop"></div>
+          <div class="photo"></div>
+        </div>
+        <p class="small-note">用于对比：布局与尺寸一致，不应用 mask 属性。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section container">
+    <div class="explain">
+      <h2>解释说明</h2>
+      <ul class="list">
+        <li><strong>测试目标：</strong>验证遮罩裁剪是否精准（仅遮罩形状内可见），外部是否真实透明，边缘是否抗锯齿。</li>
+        <li><strong>使用方法：</strong>在上方工具栏切换遮罩来源、大小、位置和重复；切换底色观察透明区域透出。</li>
+        <li><strong>检验方法：</strong>打开 DevTools → Rendering，勾选 <span class="kbd">Layer borders</span> 与 <span class="kbd">Paint flashing</span>，查看遮罩元素是否被提升为合成层以及是否产生不必要重绘。</li>
+        <li><strong>预期：</strong>Chrome 正确应用 <code>mask-image</code> 等属性，元素外部透明；首次绘制性能在可接受范围。</li>
+      </ul>
+    </div>
+  </div>
+
+  <script type="module">
+    import {qs, byId, on, copy, cssSupports, extractMaskCSS} from './assets/common.js';
+
+    const masked = byId('maskedBox');
+    const ref = byId('refBox');
+
+    // Controls
+    const maskSrc = byId('maskSrc');
+    const maskMode = byId('maskMode');
+    const maskSize = byId('maskSize');
+    const msw = byId('msw'); const msh = byId('msh');
+    const mpx = byId('mpx'); const mpy = byId('mpy');
+    const maskRepeat = byId('maskRepeat');
+    const bgChoice = byId('bgChoice');
+    const copyCss = byId('copyCss');
+
+    const mswv = byId('mswv'); const mshv = byId('mshv');
+    const mpxv = byId('mpxv'); const mpfv = byId('mpyv');
+
+    function updateBoxBG(){
+      masked.classList.remove('bg-choice-pure','bg-choice-gradient');
+      ref.classList.remove('bg-choice-pure','bg-choice-gradient');
+      if (bgChoice.value === 'pure'){
+        masked.classList.add('bg-choice-pure'); ref.classList.add('bg-choice-pure');
+      } else if (bgChoice.value === 'gradient'){
+        masked.classList.add('bg-choice-gradient'); ref.classList.add('bg-choice-gradient');
+      } // checker is default (via .checker)
+    }
+
+    function maskImageValue(){
+      switch(maskSrc.value){
+        case 'svg-circle': return "url('./assets/circle.svg')";
+        case 'svg-star': return "url('./assets/star.svg')";
+        case 'svg-ring': return "url('./assets/ring.svg')";
+        case 'svg-soft': return "url('./assets/soft-circle.svg')";
+        case 'css-radial': {
+          // Smooth alpha fade using alpha channel (for alpha mode)
+          const center = `${mpx.value}% ${mpy.value}%`;
+          return `radial-gradient(circle at ${center}, rgba(0,0,0,1) 48%, rgba(0,0,0,0) 68%)`;
+        }
+        case 'css-linear': {
+          return `linear-gradient(135deg, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 70%)`;
+        }
+        default: return 'none';
+      }
+    }
+
+    function applyMask(){
+      const img = maskImageValue();
+      const mode = maskMode.value;
+      let size = maskSize.value === 'custom' ? `${msw.value}% ${msh.value}%` : maskSize.value;
+      const pos = `${mpx.value}% ${mpy.value}%`;
+      const repeat = maskRepeat.value;
+
+      if (img === 'none'){
+        masked.style.mask = 'none';
+      } else {
+        masked.style.maskImage = img;
+        masked.style.maskMode = mode;
+        masked.style.maskSize = size;
+        masked.style.maskPosition = pos;
+        masked.style.maskRepeat = repeat;
+      }
+    }
+
+    function updateLabels(){
+      mswv.textContent = msw.value + '%';
+      mshv.textContent = msh.value + '%';
+      mpxv.textContent = mpx.value + '%';
+      byId('mpyv').textContent = mpy.value + '%';
+    }
+
+    on(maskSrc, 'change', applyMask);
+    on(maskMode, 'change', applyMask);
+    on(maskSize, 'change', ()=>{ 
+      const custom = maskSize.value === 'custom';
+      msw.disabled = msh.disabled = !custom;
+      applyMask(); 
+    });
+    [msw,msh,mpx,mpy,maskRepeat,bgChoice].forEach(el=>on(el,'input',()=>{updateLabels(); applyMask(); if (el===bgChoice) updateBoxBG();}));
+    on(copyCss,'click', ()=> copy(extractMaskCSS(masked)) );
+
+    // init
+    updateLabels(); applyMask(); updateBoxBG();
+
+    // feature detection for mask-composite (informational)
+    const support = cssSupports('mask-composite','intersect');
+    byId('supportMC').textContent = support ? 'mask-composite: 支持' : 'mask-composite: 不支持（信息）';
+  </script>
+</body>
+</html>

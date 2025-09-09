@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>12-3 多图层遮罩与合成（可选）</title>
+  <link rel="stylesheet" href="./assets/common.css">
+  <style>
+  .demo{display:flex;gap:18px;align-items:flex-start;}
+  .demo .box{width:420px;height:260px;border-radius:12px;}
+  .layers{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="container">
+      <h1 class="title">12-3 多图层遮罩与合成（可选）</h1>
+      <p class="desc">尝试多张遮罩层并指定 mask-composite 运算；若浏览器不支持，将退化为默认叠加。</p>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="container">
+      <div class="control">
+        <label>预设组合</label>
+        <select id="preset">
+          <option value="add">相加（重叠求并）</option>
+          <option value="intersect">相交（交集）</option>
+          <option value="subtract">相减（前一层减去后一层）</option>
+          <option value="exclude">对称差（异或）</option>
+        </select>
+      </div>
+      <div class="control">
+        <label>形状 A（居中）</label>
+        <select id="shapeA">
+          <option value="url('./assets/circle.svg')">圆形</option>
+          <option value="url('./assets/star.svg')">星形</option>
+          <option value="radial">径向渐变</option>
+        </select>
+      </div>
+      <div class="control">
+        <label>形状 B（可偏移）</label>
+        <select id="shapeB">
+          <option value="url('./assets/ring.svg')">圆环</option>
+          <option value="url('./assets/star.svg')">星形</option>
+          <option value="linear">线性渐变</option>
+        </select>
+      </div>
+      <div class="control">
+        <label>B 偏移 / 大小</label>
+        <div class="value">X <input id="bx" type="range" min="0" max="100" value="60"> <span id="bxv">60%</span></div>
+        <div class="value">Y <input id="by" type="range" min="0" max="100" value="40"> <span id="byv">40%</span></div>
+        <div class="value">尺寸 <input id="bs" type="range" min="40" max="160" value="100"> <span id="bsv">100%</span></div>
+      </div>
+      <div class="status">
+        <span class="badge" id="support">mask-composite: 检测中…</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section container">
+    <div class="demo">
+      <div class="card">
+        <h3>多层遮罩元素</h3>
+        <div class="box mask-target checker" id="target">
+          <div class="transparent-backdrop"></div>
+          <div class="photo"></div>
+        </div>
+        <p class="small-note">若不支持 <code>mask-composite</code>，则默认层叠显示；仍可用于观察兼容策略。</p>
+      </div>
+      <div class="card" style="flex:1">
+        <h3>有效 CSS</h3>
+        <pre><code id="cssOut"></code></pre>
+        <p class="footer-note">注意：不同浏览器/版本对 <code>mask-composite</code> 的支持可能不同；请以最新 Chrome 行为为准。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section container">
+    <div class="explain">
+      <h2>解释说明</h2>
+      <ul class="list">
+        <li><strong>测试目标：</strong>评估多遮罩层叠加与布尔合成的渲染表现。</li>
+        <li><strong>使用方法：</strong>切换预设、形状与偏移量，观察不同合成关系下的可见区域变化。</li>
+        <li><strong>检验方法：</strong>在 DevTools 开启 <span class="kbd">Layer borders</span>，检查是否生成独立合成层。</li>
+      </ul>
+    </div>
+  </div>
+
+  <script type="module">
+    import {byId, on, cssSupports} from './assets/common.js';
+    const t = byId('target'); const cssOut = byId('cssOut');
+    const preset = byId('preset'), shapeA = byId('shapeA'), shapeB = byId('shapeB');
+    const bx = byId('bx'), by = byId('by'), bs = byId('bs');
+    const bxv = byId('bxv'), byv = byId('byv'), bsv = byId('bsv');
+    const support = cssSupports('mask-composite', 'intersect');
+    byId('support').textContent = support ? 'mask-composite: 支持' : 'mask-composite: 不支持（将退化为默认叠加）';
+
+    function imgFor(value){
+      if (value === 'radial'){
+        return `radial-gradient(circle at 50% 50%, rgba(0,0,0,1) 45%, rgba(0,0,0,0) 70%)`;
+      }
+      if (value === 'linear'){
+        return `linear-gradient(135deg, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 70%)`;
+      }
+      return value; // url(...)
+    }
+
+    function apply(){
+      const a = imgFor(shapeA.value);
+      const b = imgFor(shapeB.value);
+      // Two-layer mask
+      const sizeA = '100% 100%';
+      const sizeB = `${bs.value}% ${bs.value}%`;
+      const posA = '50% 50%';
+      const posB = `${bx.value}% ${by.value}%`;
+      const repeat = 'no-repeat, no-repeat';
+      t.style.maskImage = `${a}, ${b}`;
+      t.style.maskMode = `alpha, alpha`;
+      t.style.maskSize = `${sizeA}, ${sizeB}`;
+      t.style.maskPosition = `${posA}, ${posB}`;
+      t.style.maskRepeat = repeat;
+
+      if (support){
+        const comp = preset.value; // add | subtract | intersect | exclude
+        t.style.maskComposite = `add, ${comp}`;
+      }else{
+        t.style.maskComposite = ''; // fallback: default source-over like stacking
+      }
+
+      cssOut.textContent = `mask-image: ${a}, ${b};
+mask-mode: alpha, alpha;
+mask-size: ${sizeA}, ${sizeB};
+mask-position: ${posA}, ${posB};
+mask-repeat: ${repeat};
+${support ? `mask-composite: add, ${preset.value};` : '/* mask-composite 不支持：已退化为默认叠加 */'}`;
+      bxv.textContent = bx.value + '%';
+      byv.textContent = by.value + '%';
+      bsv.textContent = bs.value + '%';
+    }
+
+    [preset, shapeA, shapeB, bx, by, bs].forEach(el => on(el, 'input', apply));
+    apply();
+  </script>
+</body>
+</html>

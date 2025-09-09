@@ -1,0 +1,25 @@
+/* Global (page) CSS that attempts to style inside custom elements (comments in English).
+   It should NOT affect elements inside any Shadow Root.
+*/
+:root{ --global-color: #1e88e5; }
+
+/* Try to style matching class names in Light DOM */
+.inside, p.inside{ color: var(--global-color); }
+
+/* Try to style 'p' inside various custom elements (should NOT penetrate Shadow DOM) */
+my-element p,
+slot-element p,
+host-element p,
+perf-element p{
+  color: var(--global-color);
+  background: rgba(30,136,229,0.08);
+}
+
+/* Toggle-able outline to visualize Light DOM boundaries */
+body.global-outline *{
+  outline: 1px dashed rgba(30,136,229,0.55);
+  outline-offset: 1px;
+}
+
+/* Light DOM style for slotted content (to show it *does* apply to projected nodes) */
+.light-slot-target{ color: var(--global-color); border-bottom: 1px dotted var(--global-color); }
