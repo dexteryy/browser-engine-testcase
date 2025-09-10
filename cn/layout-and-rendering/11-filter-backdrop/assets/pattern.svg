@@ -22,6 +22,6 @@
   <g fill="#000000" fill-opacity=".12">
     <text x="70" y="120" font-size="72" font-family="Arial, Helvetica, sans-serif" opacity=".35">BLUR TEST • 背景图样 • SVG</text>
     <text x="70" y="210" font-size="72" font-family="Arial, Helvetica, sans-serif" opacity=".35">强对比+网格+文字，便于观察模糊半径</text>
-    <text x="70" y="300" font-size="72" font-family="Arial, Helvetica, sans-serif" opacity=".35">Look for halo & edge softness</text>
+    <text x="70" y="300" font-size="72" font-family="Arial, Helvetica, sans-serif" opacity=".35">Look for halo &amp; edge softness</text>
   </g>
 </svg>
