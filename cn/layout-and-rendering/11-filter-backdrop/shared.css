@@ -1,5 +1,5 @@
 
-/* Shared base styles for Test Case 11 - comments are in English by requirement */
+/* Shared base styles for Test Case 11 (fixed version). Comments in English as required. */
 :root{
   --maxw: 1080px;
   --header-h: 76px;
@@ -25,13 +25,14 @@ a:hover{text-decoration:underline}
 .container{width:100%;max-width:var(--maxw);margin-inline:auto;padding-inline:20px}
 
 .masthead{
-  position:fixed;inset:0 0 auto 0;height:var(--header-h);z-index:1000;
+  position:fixed; top:0; left:0; right:0; height:var(--header-h); z-index:1000;
   background:#fff; /* solid by default */
   display:flex;align-items:center;border-bottom:var(--border);
   box-shadow: 0 2px 12px rgba(0,0,0,.04);
+  will-change: auto;
 }
 .masthead--glass{
-  /* This variant is the test target for backdrop-filter */
+  /* Target for backdrop-filter test */
   background: rgba(255,255,255,var(--backdrop-alpha));
   -webkit-backdrop-filter: blur(var(--backdrop-blur));
   backdrop-filter: blur(var(--backdrop-blur));
@@ -73,7 +74,7 @@ main{padding-top:calc(var(--header-h) + 16px)}
   border:var(--border);
   box-shadow: 0 12px 40px rgba(0,0,0,.10);
   filter: blur(var(--img-blur));
-  transform: translateZ(0); /* better texture sampling */
+  transform: translateZ(0); /* encourage compositing */
 }
 .photo[data-enabled="false"]{filter:none}
 

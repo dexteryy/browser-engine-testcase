@@ -5,70 +5,70 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>测试用例11-2：前景滤镜（filter: blur()）准确性与层合成</title>
   <link rel="stylesheet" href="./shared.css">
-  <script type="module">
-    import { PerfHUD } from './perf-hud.js';
-    const hud = new PerfHUD();
-    const state = {
-      enabled: true,
-      blur: 5,
-      willChange: false,
-      forceLayer: false,
-      autoScroll: false,
-      autoSpeed: 2,
-    };
-    const $ = (s,ctx=document)=>ctx.querySelector(s);
-    let rafId = 0;
-    function apply(){
-      document.documentElement.style.setProperty('--img-blur', state.blur + 'px');
-      const img = $('.photo');
-      img.dataset.enabled = state.enabled ? 'true':'false';
-      img.style.willChange = state.willChange ? 'filter' : '';
-      img.style.transform = state.forceLayer ? 'translateZ(0)' : '';
-      $('#blurVal').textContent = state.blur + 'px';
-      $('#flagEnabled').textContent = state.enabled ? '开' : '关';
-      $('#flagWC').textContent = state.willChange ? 'on' : 'off';
-      $('#flagLayer').textContent = state.forceLayer ? 'on' : 'off';
-    }
-    function loop(){
-      if(!state.autoScroll) return;
-      window.scrollBy(0, state.autoSpeed);
-      if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight || window.scrollY <= 0) {
-        state.autoSpeed = -state.autoSpeed;
+  <script src="./perf-hud.js" defer></script>
+  <script defer>
+    (function(){
+      function $(s,ctx){ return (ctx||document).querySelector(s); }
+      var hud = null;
+      var state = { enabled:true, blur:5, willChange:false, forceLayer:false, autoScroll:false, autoSpeed:2 };
+      var rafId = 0;
+
+      function apply(){
+        document.documentElement.style.setProperty('--img-blur', state.blur + 'px');
+        var img = $('.photo');
+        if (img){
+          img.dataset.enabled = state.enabled ? 'true':'false';
+          img.style.willChange = state.willChange ? 'filter' : '';
+          img.style.transform = state.forceLayer ? 'translateZ(0)' : '';
+        }
+        $('#blurVal').textContent = state.blur + 'px';
       }
-      rafId = requestAnimationFrame(loop);
-    }
-    function toggleAuto(on){
-      cancelAnimationFrame(rafId);
-      state.autoScroll = on;
-      if(on) rafId = requestAnimationFrame(loop);
-    }
-    window.addEventListener('DOMContentLoaded', () => {
-      apply();
-      // IO to display viewport status
-      const visEl = $('#inview');
-      const io = new IntersectionObserver(entries => {
-        visEl.textContent = entries[0].isIntersecting ? '是' : '否';
-      }, {threshold: 0.01});
-      io.observe($('.photo'));
-      // UI bindings
-      $('#enable').addEventListener('change', e => { state.enabled = e.target.checked; apply(); });
-      $('#blur').addEventListener('input', e => { state.blur = +e.target.value; apply(); });
-      $('#wc').addEventListener('change', e => { state.willChange = e.target.checked; apply(); });
-      $('#layer').addEventListener('change', e => { state.forceLayer = e.target.checked; apply(); });
-      $('#auto').addEventListener('change', e => toggleAuto(e.target.checked));
-      $('#speed').addEventListener('input', e => state.autoSpeed = +e.target.value);
-      $('#hud').addEventListener('change', e => e.target.checked ? hud.start() : hud.stop());
-      $('#reset').addEventListener('click', () => {
-        Object.assign(state, {enabled:true, blur:5, willChange:false, forceLayer:false, autoScroll:false, autoSpeed:2});
-        $('#enable').checked = true; $('#blur').value = 5; $('#wc').checked = false; $('#layer').checked = false;
-        $('#auto').checked = false; $('#speed').value = 2; $('#hud').checked = false; hud.stop();
-        apply(); window.scrollTo({top:0});
+      function loop(){
+        if(!state.autoScroll) return;
+        window.scrollBy(0, state.autoSpeed);
+        if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight || window.scrollY <= 0) {
+          state.autoSpeed = -state.autoSpeed;
+        }
+        rafId = requestAnimationFrame(loop);
+      }
+      function toggleAuto(on){
+        cancelAnimationFrame(rafId);
+        state.autoScroll = on;
+        if(on) rafId = requestAnimationFrame(loop);
+      }
+
+      document.addEventListener('DOMContentLoaded', function(){
+        hud = new window.PerfHUD();
+
+        // Viewport status via IntersectionObserver
+        var visEl = $('#inview');
+        var io = new IntersectionObserver(function(entries){
+          visEl.textContent = entries[0].isIntersecting ? '是' : '否';
+        }, {threshold: 0.01});
+        var img = $('.photo');
+        if (img) io.observe(img);
+
+        $('#enable').addEventListener('change', function(e){ state.enabled = e.target.checked; apply(); });
+        $('#blur').addEventListener('input', function(e){ state.blur = +e.target.value; apply(); });
+        $('#wc').addEventListener('change', function(e){ state.willChange = e.target.checked; apply(); });
+        $('#layer').addEventListener('change', function(e){ state.forceLayer = e.target.checked; apply(); });
+        $('#auto').addEventListener('change', function(e){ toggleAuto(e.target.checked); });
+        $('#speed').addEventListener('input', function(e){ state.autoSpeed = +e.target.value; });
+        $('#hud').addEventListener('change', function(e){ e.target.checked ? hud.start() : hud.stop(); });
+        $('#reset').addEventListener('click', function(){
+          Object.assign(state, {enabled:true, blur:5, willChange:false, forceLayer:false, autoScroll:false, autoSpeed:2});
+          $('#enable').checked = true; $('#blur').value = 5; $('#wc').checked = false; $('#layer').checked = false;
+          $('#auto').checked = false; $('#speed').value = 2; $('#hud').checked = false; hud.stop();
+          apply(); window.scrollTo({top:0});
+        });
+
+        apply();
       });
-    });
+    })();
   </script>
 </head>
 <body>
-  <!-- 顶栏（本页为纯说明用，不应用 backdrop-filter，避免干扰单项测试） -->
+  <!-- 顶栏（说明用途，不应用 backdrop-filter，避免干扰单项测试） -->
   <header class="masthead">
     <div class="container title">
       <h1>测试用例11-2：前景滤镜（filter: blur()）准确性与层合成</h1>
@@ -120,7 +120,7 @@
 <p>段落 19：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
 <p>段落 20：用于制造滚动的占位文本。观察图片模糊边缘的过渡是否平滑，自然无锯齿。</p>
         <div class="photo-wrap">
-          <img class="photo" src="./assets/pattern.svg" alt="彩色网格背景（用于观察模糊效果）" data-enabled="true">
+          <img class="photo" src="./assets/pattern.svg" alt="彩色网格背景（用于观察模糊效果）" data-enabled="true" onerror="this.replaceWith(document.createTextNode('图片加载失败：请确认 assets/pattern.svg 是否存在'))">
         </div>
         <p>段落 21：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>
 <p>段落 22：继续滚动，留意图片离开视口时，是否仍触发不必要的重绘。</p>

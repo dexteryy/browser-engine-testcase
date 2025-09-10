@@ -5,90 +5,83 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>测试用例11-3：综合场景（背景滤镜 + 前景滤镜）</title>
   <link rel="stylesheet" href="./shared.css">
-  <script type="module">
-    import { PerfHUD } from './perf-hud.js';
-    const hud = new PerfHUD();
-    const $ = (s,ctx=document)=>ctx.querySelector(s);
+  <script src="./perf-hud.js" defer></script>
+  <script defer>
+    (function(){
+      function $(s,ctx){ return (ctx||document).querySelector(s); }
+      var hud = null;
+      var state = {
+        bdEnabled:true, bdBlur:5, bdAlpha:.6, bdWC:false, bdLayer:false,
+        imEnabled:true, imBlur:5, imWC:false, imLayer:false,
+        auto:false, speed:2
+      };
+      var rafId = 0;
 
-    const state = {
-      // backdrop
-      bdEnabled: true,
-      bdBlur: 5,
-      bdAlpha: .6,
-      bdWC: false,
-      bdLayer: false,
-      // image
-      imEnabled: true,
-      imBlur: 5,
-      imWC: false,
-      imLayer: false,
-      // misc
-      auto: false,
-      speed: 2,
-    };
+      function apply(){
+        document.documentElement.style.setProperty('--backdrop-blur', state.bdBlur + 'px');
+        document.documentElement.style.setProperty('--backdrop-alpha', String(state.bdAlpha));
+        document.documentElement.style.setProperty('--img-blur', state.imBlur + 'px');
 
-    const header = document.createElement('div');
-
-    function apply(){
-      document.documentElement.style.setProperty('--backdrop-blur', state.bdBlur + 'px');
-      document.documentElement.style.setProperty('--backdrop-alpha', String(state.bdAlpha));
-      document.documentElement.style.setProperty('--img-blur', state.imBlur + 'px');
-
-      const hd = $('.masthead');
-      hd.classList.toggle('masthead--glass', state.bdEnabled);
-      hd.style.willChange = state.bdWC ? 'backdrop-filter' : '';
-      hd.style.transform = state.bdLayer ? 'translateZ(0)' : '';
-
-      const img = $('.photo');
-      img.dataset.enabled = state.imEnabled ? 'true' : 'false';
-      img.style.willChange = state.imWC ? 'filter' : '';
-      img.style.transform = state.imLayer ? 'translateZ(0)' : '';
-
-      $('#bdBlurVal').textContent = state.bdBlur + 'px';
-      $('#bdAlphaVal').textContent = Math.round(state.bdAlpha * 100) + '%';
-      $('#imBlurVal').textContent = state.imBlur + 'px';
-    }
-
-    // auto scroll
-    let rafId = 0;
-    function loop(){
-      if(!state.auto) return;
-      window.scrollBy(0, state.speed);
-      if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight || window.scrollY <= 0) {
-        state.speed = -state.speed;
+        var hd = $('.masthead');
+        if (hd){
+          hd.classList.toggle('masthead--glass', state.bdEnabled);
+          hd.style.willChange = state.bdWC ? 'backdrop-filter' : '';
+          hd.style.transform = state.bdLayer ? 'translateZ(0)' : '';
+        }
+        var img = $('.photo');
+        if (img){
+          img.dataset.enabled = state.imEnabled ? 'true' : 'false';
+          img.style.willChange = state.imWC ? 'filter' : '';
+          img.style.transform = state.imLayer ? 'translateZ(0)' : '';
+        }
+        $('#bdBlurVal').textContent = state.bdBlur + 'px';
+        $('#bdAlphaVal').textContent = Math.round(state.bdAlpha * 100) + '%';
+        $('#imBlurVal').textContent = state.imBlur + 'px';
       }
-      rafId = requestAnimationFrame(loop);
-    }
-    function toggleAuto(on){
-      cancelAnimationFrame(rafId);
-      state.auto = on;
-      if(on) rafId = requestAnimationFrame(loop);
-    }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      apply();
-      // Backdrop controls
-      $('#bdEnable').addEventListener('change', e => { state.bdEnabled = e.target.checked; apply(); });
-      $('#bdBlur').addEventListener('input', e => { state.bdBlur = +e.target.value; apply(); });
-      $('#bdAlpha').addEventListener('input', e => { state.bdAlpha = +e.target.value; apply(); });
-      $('#bdWC').addEventListener('change', e => { state.bdWC = e.target.checked; apply(); });
-      $('#bdLayer').addEventListener('change', e => { state.bdLayer = e.target.checked; apply(); });
-      // Image controls
-      $('#imEnable').addEventListener('change', e => { state.imEnabled = e.target.checked; apply(); });
-      $('#imBlur').addEventListener('input', e => { state.imBlur = +e.target.value; apply(); });
-      $('#imWC').addEventListener('change', e => { state.imWC = e.target.checked; apply(); });
-      $('#imLayer').addEventListener('change', e => { state.imLayer = e.target.checked; apply(); });
-      // Misc
-      $('#auto').addEventListener('change', e => toggleAuto(e.target.checked));
-      $('#speed').addEventListener('input', e => state.speed = +e.target.value);
-      $('#hud').addEventListener('change', e => e.target.checked ? hud.start() : hud.stop());
-      $('#reset').addEventListener('click', () => {
-        Object.assign(state, {bdEnabled:true, bdBlur:5, bdAlpha:.6, bdWC:false, bdLayer:false, imEnabled:true, imBlur:5, imWC:false, imLayer:false, auto:false, speed:2});
-        $('#bdEnable').checked = true; $('#bdBlur').value=5; $('#bdAlpha').value=.6; $('#bdWC').checked=false; $('#bdLayer').checked=false;
-        $('#imEnable').checked = true; $('#imBlur').value=5; $('#imWC').checked=false; $('#imLayer').checked=false;
-        $('#auto').checked=false; $('#speed').value=2; $('#hud').checked=false; hud.stop(); apply(); window.scrollTo({top:0});
-      })
-    });
+      function loop(){
+        if(!state.auto) return;
+        window.scrollBy(0, state.speed);
+        if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight || window.scrollY <= 0) {
+          state.speed = -state.speed;
+        }
+        rafId = requestAnimationFrame(loop);
+      }
+      function toggleAuto(on){
+        cancelAnimationFrame(rafId);
+        state.auto = on;
+        if(on) rafId = requestAnimationFrame(loop);
+      }
+
+      document.addEventListener('DOMContentLoaded', function(){
+        hud = new window.PerfHUD();
+
+        // Bind controls
+        $('#bdEnable').addEventListener('change', function(e){ state.bdEnabled = e.target.checked; apply(); });
+        $('#bdBlur').addEventListener('input', function(e){ state.bdBlur = +e.target.value; apply(); });
+        $('#bdAlpha').addEventListener('input', function(e){ state.bdAlpha = +e.target.value; apply(); });
+        $('#bdWC').addEventListener('change', function(e){ state.bdWC = e.target.checked; apply(); });
+        $('#bdLayer').addEventListener('change', function(e){ state.bdLayer = e.target.checked; apply(); });
+
+        $('#imEnable').addEventListener('change', function(e){ state.imEnabled = e.target.checked; apply(); });
+        $('#imBlur').addEventListener('input', function(e){ state.imBlur = +e.target.value; apply(); });
+        $('#imWC').addEventListener('change', function(e){ state.imWC = e.target.checked; apply(); });
+        $('#imLayer').addEventListener('change', function(e){ state.imLayer = e.target.checked; apply(); });
+
+        $('#auto').addEventListener('change', function(e){ toggleAuto(e.target.checked); });
+        $('#speed').addEventListener('input', function(e){ state.speed = +e.target.value; });
+        $('#hud').addEventListener('change', function(e){ e.target.checked ? hud.start() : hud.stop(); });
+        $('#reset').addEventListener('click', function(){
+          Object.assign(state, {bdEnabled:true, bdBlur:5, bdAlpha:.6, bdWC:false, bdLayer:false, imEnabled:true, imBlur:5, imWC:false, imLayer:false, auto:false, speed:2});
+          $('#bdEnable').checked=true; $('#bdBlur').value=5; $('#bdAlpha').value=.6; $('#bdWC').checked=false; $('#bdLayer').checked=false;
+          $('#imEnable').checked=true; $('#imBlur').value=5; $('#imWC').checked=false; $('#imLayer').checked=false;
+          $('#auto').checked=false; $('#speed').value=2; $('#hud').checked=false; hud.stop();
+          apply(); window.scrollTo({top:0});
+        });
+
+        apply();
+      });
+    })();
   </script>
 </head>
 <body>
@@ -148,7 +141,7 @@
 <p>段落 15：用于滚动的占位文本。背景与前景滤镜叠加时，注意有无穿透或遮罩错误。</p>
 <p>段落 16：用于滚动的占位文本。背景与前景滤镜叠加时，注意有无穿透或遮罩错误。</p>
         <div class="photo-wrap">
-          <img class="photo" src="./assets/pattern.svg" alt="彩色网格背景（用于观察模糊效果）" data-enabled="true">
+          <img class="photo" src="./assets/pattern.svg" alt="彩色网格背景（用于观察模糊效果）" data-enabled="true" onerror="this.replaceWith(document.createTextNode('图片加载失败：请确认 assets/pattern.svg 是否存在'))">
         </div>
         <p>段落 17：继续滚动，留意顶栏后的模糊是否与图片的前景模糊相互影响（理论上互不影响）。</p>
 <p>段落 18：继续滚动，留意顶栏后的模糊是否与图片的前景模糊相互影响（理论上互不影响）。</p>

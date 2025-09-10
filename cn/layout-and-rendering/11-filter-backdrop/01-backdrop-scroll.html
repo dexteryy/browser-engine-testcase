@@ -5,83 +5,89 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>测试用例11-1：背景滤镜（backdrop-filter）滚动性能</title>
   <link rel="stylesheet" href="./shared.css">
-  <script type="module">
-    import { PerfHUD } from './perf-hud.js';
-    // --- State ---
-    const hud = new PerfHUD();
-    const state = {
-      enabled: true,
-      blur: 5,
-      alpha: 0.6,
-      willChange: false,
-      forceLayer: false,
-      autoScroll: false,
-      autoSpeed: 2, // px per frame
-    };
+  <script src="./perf-hud.js" defer></script>
+  <script defer>
+    // All logic runs after HTML is parsed (defer). Avoid querying DOM before it's ready.
+    (function(){
+      // Simple qs helper
+      function $(sel, ctx){ return (ctx||document).querySelector(sel); }
 
-    // --- Helpers ---
-    const $ = (sel, ctx=document) => ctx.querySelector(sel);
-    const header = $('.masthead');
+      var hud = null;
+      var state = {
+        enabled: true,
+        blur: 5,
+        alpha: 0.6,
+        willChange: false,
+        forceLayer: false,
+        autoScroll: false,
+        autoSpeed: 2
+      };
 
-    function apply() {
-      document.documentElement.style.setProperty('--backdrop-blur', state.blur + 'px');
-      document.documentElement.style.setProperty('--backdrop-alpha', String(state.alpha));
-      header.classList.toggle('masthead--glass', state.enabled);
-      header.style.willChange = state.willChange ? 'backdrop-filter' : '';
-      header.style.transform = state.forceLayer ? 'translateZ(0)' : '';
-      $('#blurVal').textContent = state.blur + 'px';
-      $('#alphaVal').textContent = Math.round(state.alpha*100) + '%';
-      $('#flagEnabled').textContent = state.enabled ? '开' : '关';
-      $('#flagWC').textContent = state.willChange ? 'on' : 'off';
-      $('#flagLayer').textContent = state.forceLayer ? 'on' : 'off';
-    }
-
-    // --- Auto scroll loop ---
-    let rafId = 0;
-    function loop() {
-      if (!state.autoScroll) return;
-      window.scrollBy(0, state.autoSpeed);
-      // bounce at edges
-      if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight || window.scrollY <= 0) {
-        state.autoSpeed = -state.autoSpeed;
+      var rafId = 0;
+      function loop(){
+        if(!state.autoScroll) return;
+        window.scrollBy(0, state.autoSpeed);
+        if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight || window.scrollY <= 0) {
+          state.autoSpeed = -state.autoSpeed;
+        }
+        rafId = requestAnimationFrame(loop);
       }
-      rafId = requestAnimationFrame(loop);
-    }
-    function toggleAutoScroll(on) {
-      state.autoScroll = on;
-      cancelAnimationFrame(rafId);
-      if (on) rafId = requestAnimationFrame(loop);
-    }
+      function toggleAutoScroll(on){
+        cancelAnimationFrame(rafId);
+        state.autoScroll = on;
+        if(on) rafId = requestAnimationFrame(loop);
+      }
 
-    // --- Bind UI ---
-    window.addEventListener('DOMContentLoaded', () => {
-      apply();
-      $('#enable').addEventListener('change', e => { state.enabled = e.target.checked; apply(); });
-      $('#blur').addEventListener('input', e => { state.blur = +e.target.value; apply(); });
-      $('#alpha').addEventListener('input', e => { state.alpha = +e.target.value; apply(); });
-      $('#wc').addEventListener('change', e => { state.willChange = e.target.checked; apply(); });
-      $('#layer').addEventListener('change', e => { state.forceLayer = e.target.checked; apply(); });
+      function apply(){
+        document.documentElement.style.setProperty('--backdrop-blur', state.blur + 'px');
+        document.documentElement.style.setProperty('--backdrop-alpha', String(state.alpha));
+        var header = $('.masthead');
+        if (header){
+          header.classList.toggle('masthead--glass', state.enabled);
+          header.style.willChange = state.willChange ? 'backdrop-filter' : '';
+          header.style.transform = state.forceLayer ? 'translateZ(0)' : '';
+        }
+        $('#blurVal').textContent = state.blur + 'px';
+        $('#alphaVal').textContent = Math.round(state.alpha*100) + '%';
+      }
 
-      $('#auto').addEventListener('change', e => toggleAutoScroll(e.target.checked));
-      $('#speed').addEventListener('input', e => state.autoSpeed = +e.target.value);
+      document.addEventListener('DOMContentLoaded', function(){
+        // Init HUD
+        hud = new window.PerfHUD();
 
-      $('#hud').addEventListener('change', e => e.target.checked ? hud.start() : hud.stop());
-      $('#reset').addEventListener('click', () => {
-        Object.assign(state, {enabled:true, blur:5, alpha:0.6, willChange:false, forceLayer:false, autoScroll:false, autoSpeed:2});
+        // Bind UI
+        $('#enable').addEventListener('change', function(e){ state.enabled = e.target.checked; apply(); });
+        $('#blur').addEventListener('input', function(e){ state.blur = +e.target.value; apply(); });
+        $('#alpha').addEventListener('input', function(e){ state.alpha = +e.target.value; apply(); });
+        $('#wc').addEventListener('change', function(e){ state.willChange = e.target.checked; apply(); });
+        $('#layer').addEventListener('change', function(e){ state.forceLayer = e.target.checked; apply(); });
+
+        $('#auto').addEventListener('change', function(e){ toggleAutoScroll(e.target.checked); });
+        $('#speed').addEventListener('input', function(e){ state.autoSpeed = +e.target.value; });
+
+        $('#hud').addEventListener('change', function(e){ e.target.checked ? hud.start() : hud.stop(); });
+        $('#reset').addEventListener('click', function(){
+          Object.assign(state, {enabled:true, blur:5, alpha:0.6, willChange:false, forceLayer:false, autoScroll:false, autoSpeed:2});
+          $('#enable').checked = true;
+          $('#blur').value = 5;
+          $('#alpha').value = 0.6;
+          $('#wc').checked = false;
+          $('#layer').checked = false;
+          $('#auto').checked = false;
+          $('#speed').value = 2;
+          $('#hud').checked = false;
+          hud.stop();
+          apply();
+          window.scrollTo({top:0});
+        });
+
+        // Feature hint: whether backdrop-filter is supported
+        var support = CSS.supports('backdrop-filter', 'blur(5px)') || CSS.supports('-webkit-backdrop-filter', 'blur(5px)');
+        $('#supportInfo').textContent = support ? '支持' : '不支持（可能无法显示模糊）';
+
         apply();
-        toggleAutoScroll(false);
-        $('#enable').checked = true;
-        $('#blur').value = 5;
-        $('#alpha').value = 0.6;
-        $('#wc').checked = false;
-        $('#layer').checked = false;
-        $('#auto').checked = false;
-        $('#speed').value = 2;
-        $('#hud').checked = false;
-        hud.stop();
-        window.scrollTo({top:0});
       });
-    });
+    })();
   </script>
 </head>
 <body>
@@ -102,6 +108,7 @@
         <div class="group"><label>透明度 <input id="alpha" type="range" min="0.2" max="0.95" step="0.01" value="0.6"></label><span class="num" id="alphaVal">60%</span></div>
         <div class="group"><label><input id="wc" type="checkbox"> will-change: backdrop-filter</label></div>
         <div class="group"><label><input id="layer" type="checkbox"> 强制合成层(transform: translateZ(0))</label></div>
+        <span class="flag">支持情况：<b id="supportInfo">检测中</b></span>
       </div>
       <div class="row">
         <div class="group"><label><input id="auto" type="checkbox"> 自动滚动</label></div>
@@ -118,65 +125,64 @@
         <p class="meta">滚动页面，观察顶栏后的内容是否实时模糊且平滑；关注流畅度和是否出现“未模糊的一帧”。</p>
       </div>
       <div class="scroller long-list" id="longList">
-        <!-- Repeat blocks of text to ensure tall scroll height -->
         <p>为了方便观察，本页提供高对比度的背景图像和大量文本。请上下滚动，注意顶栏后的文字与图片是否立即被模糊，过渡是否平滑。</p>
         <p>建议结合 DevTools 的 <b>Paint Flashing</b> 与 <b>Layer Borders</b>：若顶栏区域持续闪烁绿色，说明滚动时存在每帧重绘。</p>
-        <img src="./assets/pattern.svg" alt="彩色网格背景" style="width:100%;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 8px 30px rgba(0,0,0,.1);margin:16px 0;">
-        <p>段落 1：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 2：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 3：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 4：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 5：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 6：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 7：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 8：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 9：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 10：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 11：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 12：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 13：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 14：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 15：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 16：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 17：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 18：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 19：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 20：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 21：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 22：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 23：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 24：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 25：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 26：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 27：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 28：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 29：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 30：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 31：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 32：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 33：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 34：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 35：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 36：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 37：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 38：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 39：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 40：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 41：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 42：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 43：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 44：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 45：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 46：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 47：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 48：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 49：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 50：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 51：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 52：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 53：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 54：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
-<p>段落 55：这是用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+        <img src="./assets/pattern.svg" alt="彩色网格背景" style="width:100%;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 8px 30px rgba(0,0,0,.1);margin:16px 0;" onload="this.setAttribute('data-loaded','1')" onerror="this.replaceWith(document.createTextNode('图片加载失败：请确认 assets/pattern.svg 是否存在'))">
+        <p>段落 1：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 2：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 3：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 4：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 5：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 6：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 7：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 8：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 9：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 10：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 11：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 12：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 13：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 14：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 15：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 16：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 17：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 18：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 19：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 20：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 21：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 22：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 23：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 24：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 25：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 26：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 27：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 28：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 29：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 30：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 31：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 32：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 33：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 34：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 35：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 36：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 37：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 38：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 39：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 40：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 41：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 42：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 43：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 44：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 45：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 46：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 47：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 48：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 49：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 50：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 51：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 52：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 53：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 54：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
+<p>段落 55：用于滚动的占位文本。模糊半径较大时，边缘会呈现明显的光晕。请留意滚动中的细节变化。</p>
       </div>
     </section>
 
@@ -212,8 +218,5 @@
       <a href="./03-combined.html">前往 11-3：综合场景</a>
     </nav>
   </main>
-  <script type="module">
-    // No-op: module block exists to keep type=module for import maps consistency in some tools
-  </script>
 </body>
 </html>
